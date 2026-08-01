@@ -239,6 +239,12 @@ ul.list li .actions button { font-size: 9px; padding: 4px 6px; }
 #game-screen { display: none; }
 #game-screen.active { display: block; }
 
+.screen-enter { animation: screen-fade-in 0.35s ease-out; }
+@keyframes screen-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .arcade-score {
   font-family: 'PixelArcade', monospace;
   font-size: 22px;
@@ -248,6 +254,25 @@ ul.list li .actions button { font-size: 9px; padding: 4px 6px; }
   padding: 10px 16px;
   background: var(--panel);
   display: inline-block;
+  position: relative;
+}
+
+.score-popup {
+  position: absolute;
+  top: -2px;
+  right: -6px;
+  font-family: 'PixelArcade', monospace;
+  font-size: 14px;
+  color: var(--green);
+  text-shadow: 0 0 8px rgba(51,255,140,0.8);
+  pointer-events: none;
+  animation: score-pop-float 0.9s ease-out forwards;
+  white-space: nowrap;
+}
+@keyframes score-pop-float {
+  0% { opacity: 0; transform: translateY(0) scale(0.8); }
+  15% { opacity: 1; transform: translateY(-6px) scale(1.15); }
+  100% { opacity: 0; transform: translateY(-32px) scale(1); }
 }
 
 .super-badge {
@@ -660,7 +685,23 @@ ul.list li .actions button { font-size: 9px; padding: 4px 6px; }
   margin: 14px 0 4px;
 }
 
-.perfect-round-banner { margin: 10px 0; }
+.perfect-round-banner { margin: 10px 0; position: relative; }
+
+#particle-burst { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.particle {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 8px; height: 8px;
+  margin: -4px;
+  animation: particle-burst-move 0.9s ease-out forwards;
+}
+.particle-pac { border-radius: 50%; }
+.particle-blocks { border-radius: 2px; }
+.particle-plumber { border-radius: 50%; box-shadow: 0 0 4px rgba(255,217,61,0.8); }
+@keyframes particle-burst-move {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0.4); opacity: 0; }
+}
 .perfect-round-text {
   font-family: 'PixelArcade', monospace;
   font-size: 18px;
@@ -998,6 +1039,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
       </div>
 
       <div class="perfect-round-banner hidden" id="perfect-round-banner">
+        <div id="particle-burst"></div>
         <div class="perfect-round-text">PERFECT ROUND!</div>
 
         <div class="theme-decor theme-decor-pac">
@@ -1127,6 +1169,15 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
         <button id="generate-tips-btn" class="secondary">GENERATE IMPROVEMENT TIPS</button>
       </div>
       <div id="tips-status" class="status-msg"></div>
+    </div>
+
+    <div class="panel" id="miss-rate-panel">
+      <h2>CLASS MISS RATE (selected week)</h2>
+      <p style="font-size:11px;color:var(--muted);margin-top:0;">How often each question has been missed across every saved game for this week — highest miss rate first.</p>
+      <div id="miss-rate-list"></div>
+      <div class="row" style="margin-top:10px;">
+        <button id="clear-miss-rate-btn" class="danger">CLEAR ALL MISS-RATE DATA</button>
+      </div>
     </div>
 
     <div class="panel" id="questions-panel">
@@ -2238,7 +2289,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     var course = getCourse(selectedCourseId);
     var week = getWeek(course, selectedWeekId);
     var container = document.getElementById('week-history-list');
-    if (!week) { container.innerHTML = ''; selectedHistoryId = null; return; }
+    if (!week) { container.innerHTML = ''; selectedHistoryId = null; renderMissRateView(null); return; }
     var hist = (week.history || []).slice().reverse();
     if (!hist.some(function (h) { return h.id === selectedHistoryId; })) selectedHistoryId = null;
     if (hist.length === 0) {
@@ -2272,7 +2323,72 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
         renderWeekHistory();
       });
     });
+    renderMissRateView(week);
   }
+
+  function computeMissRates(week) {
+    var stats = {};
+    var order = [];
+    (week.history || []).forEach(function (h) {
+      (h.details || []).forEach(function (d) {
+        if (!stats[d.prompt]) { stats[d.prompt] = { attempts: 0, misses: 0 }; order.push(d.prompt); }
+        stats[d.prompt].attempts++;
+        if (!d.correct) stats[d.prompt].misses++;
+      });
+    });
+    return order.map(function (prompt) {
+      var s = stats[prompt];
+      return { prompt: prompt, attempts: s.attempts, misses: s.misses, missRate: s.misses / s.attempts };
+    }).sort(function (a, b) { return b.missRate - a.missRate || b.attempts - a.attempts; });
+  }
+
+  var lastMissRateRows = [];
+
+  function renderMissRateView(week) {
+    var container = document.getElementById('miss-rate-list');
+    if (!week) {
+      container.innerHTML = '';
+      lastMissRateRows = [];
+      return;
+    }
+    var rows = computeMissRates(week);
+    lastMissRateRows = rows;
+    if (rows.length === 0) {
+      container.innerHTML = '<p style="font-size:11px;color:var(--muted);">No games played yet for this week.</p>';
+      return;
+    }
+    var html = '<ul class="list">';
+    rows.forEach(function (r, i) {
+      var pct = Math.round(r.missRate * 100);
+      html += '<li><span>' + escapeHtml(r.prompt) + '</span>' +
+        '<span class="meta">' + r.misses + '/' + r.attempts + ' missed (' + pct + '%)</span>' +
+        '<span class="actions"><button data-act="clear-miss-rate" data-idx="' + i + '" class="danger">CLEAR</button></span></li>';
+    });
+    html += '</ul>';
+    container.innerHTML = html;
+    container.querySelectorAll('[data-act="clear-miss-rate"]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var row = lastMissRateRows[parseInt(btn.dataset.idx, 10)];
+        if (!row) return;
+        if (!confirm('Clear miss-rate data for "' + row.prompt + '"?')) return;
+        (week.history || []).forEach(function (h) {
+          if (Array.isArray(h.details)) h.details = h.details.filter(function (d) { return d.prompt !== row.prompt; });
+        });
+        persist();
+        renderMissRateView(week);
+      });
+    });
+  }
+
+  document.getElementById('clear-miss-rate-btn').addEventListener('click', function () {
+    var course = getCourse(selectedCourseId);
+    var week = getWeek(course, selectedWeekId);
+    if (!week) return;
+    if (!confirm('Clear ALL miss-rate data for this week? Saved game history entries are kept, but their per-question detail is removed.')) return;
+    (week.history || []).forEach(function (h) { h.details = []; });
+    persist();
+    renderMissRateView(week);
+  });
 
   document.getElementById('clear-week-history-btn').addEventListener('click', function () {
     var course = getCourse(selectedCourseId);
@@ -2493,6 +2609,49 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     };
   }
 
+  function playScreenEnter(el) {
+    el.classList.remove('screen-enter');
+    void el.offsetWidth;
+    el.classList.add('screen-enter');
+  }
+
+  var PARTICLE_COLORS_BY_THEME = {
+    pac: ['var(--yellow)', 'var(--pink)', 'var(--cyan)'],
+    blocks: ['var(--cyan)', 'var(--pink)', 'var(--yellow)', 'var(--green)'],
+    plumber: ['var(--yellow)', 'var(--red)', 'var(--green)']
+  };
+
+  function spawnPerfectParticles() {
+    var theme = currentThemeId();
+    var container = document.getElementById('particle-burst');
+    if (!container) return;
+    container.innerHTML = '';
+    var colors = PARTICLE_COLORS_BY_THEME[theme] || PARTICLE_COLORS_BY_THEME.pac;
+    var count = 18;
+    for (var i = 0; i < count; i++) {
+      var p = document.createElement('span');
+      p.className = 'particle particle-' + theme;
+      var angle = (Math.PI * 2 * i) / count + (Math.random() * 0.5 - 0.25);
+      var dist = 60 + Math.random() * 60;
+      p.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+      p.style.setProperty('--dy', (Math.sin(angle) * dist) + 'px');
+      p.style.background = colors[i % colors.length];
+      p.style.animationDelay = (Math.random() * 0.15) + 's';
+      container.appendChild(p);
+    }
+    setTimeout(function () { container.innerHTML = ''; }, 1300);
+  }
+
+  function spawnScorePopup(text) {
+    var anchor = document.querySelector('.arcade-score');
+    if (!anchor) return;
+    var el = document.createElement('span');
+    el.className = 'score-popup';
+    el.textContent = text;
+    anchor.appendChild(el);
+    setTimeout(function () { el.remove(); }, 900);
+  }
+
   function launchGame(course, week, questionPool, count, timerSeconds, mixWeeks) {
     var pool = questionPool.slice();
     if (week.randomOrder !== false) {
@@ -2521,6 +2680,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     document.getElementById('chase-strip').classList.add('hidden');
     document.getElementById('game-screen').classList.add('active');
     document.getElementById('end-screen').classList.remove('active');
+    playScreenEnter(document.getElementById('game-screen'));
     updateSuperMode();
     renderQuestionScreen();
   }
@@ -2731,6 +2891,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
       gameState.score += wasSuper ? 2 : 1;
       gameState.streak++;
       playCorrectSound();
+      spawnScorePopup(wasSuper ? '+2 SUPER' : '+1');
     } else {
       gameState.lives--;
       gameState.streak = 0;
@@ -2805,6 +2966,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     document.getElementById('chase-strip').classList.remove('hidden');
     document.getElementById('game-screen').classList.remove('active');
     document.getElementById('end-screen').classList.remove('active');
+    playScreenEnter(document.getElementById('play-setup'));
     gameState = null;
     renderTopScoreIndicator();
   }
@@ -2812,6 +2974,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
   function showEndScreen() {
     document.getElementById('game-screen').classList.remove('active');
     document.getElementById('end-screen').classList.add('active');
+    playScreenEnter(document.getElementById('end-screen'));
     var outOfLives = gameState.lives <= 0;
     var correctCount = gameState.log.filter(function (e) { return e.correct; }).length;
     var bonus = gameState.score - correctCount;
@@ -2827,6 +2990,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     document.getElementById('perfect-round-banner').classList.toggle('hidden', !isPerfect);
     document.getElementById('game-over-decor').classList.toggle('hidden', isPerfect);
     if (isPerfect) playPerfectRoundSound(); else playGameOverSound();
+    if (isPerfect) setTimeout(spawnPerfectParticles, 350);
 
     document.getElementById('score-label-input').value = '';
     document.getElementById('save-score-status').textContent = '';
