@@ -629,6 +629,8 @@ ul.list li .actions button { font-size: 9px; padding: 4px 6px; }
 .choice-btn:hover { border-color: var(--cyan); }
 .choice-btn.correct { background: rgba(51,255,140,0.2); border-color: var(--green); box-shadow: 0 0 14px rgba(51,255,140,0.6); }
 .choice-btn.wrong { background: rgba(255,59,59,0.2); border-color: var(--red); box-shadow: 0 0 14px rgba(255,59,59,0.6); }
+.choice-btn.correct::after { content: ' \2713'; color: var(--green); font-weight: bold; }
+.choice-btn.wrong::after { content: ' \2717'; color: var(--red); font-weight: bold; }
 .choice-btn:disabled { cursor: default; }
 
 .live-explanation {
@@ -917,6 +919,11 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
           <label for="play-timer-seconds">Time per question, sec (0 = off)</label>
           <input type="number" id="play-timer-seconds" min="0" value="0">
         </div>
+      </div>
+      <div class="row" style="margin-top:8px; align-items:center;">
+        <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); cursor:pointer;">
+          <input type="checkbox" id="play-mix-weeks"> Mix in questions from all weeks in this course
+        </label>
       </div>
       <div class="row" style="margin-top:8px; align-items:center;">
         <button id="best-score-toggle-btn" class="ghost" type="button">BEST SCORE: OFF</button>
@@ -2437,11 +2444,19 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     updatePlayCountMax();
   }
 
+  function getAllCourseQuestions(course) {
+    var all = [];
+    (course ? course.weeks : []).forEach(function (w) { all = all.concat(w.questions); });
+    return all;
+  }
+
   function updatePlayCountMax() {
     var course = getCourse(playCourseSelect.value);
     var week = getWeek(course, playWeekSelect.value);
+    var mixWeeks = document.getElementById('play-mix-weeks').checked;
+    var poolSize = mixWeeks ? getAllCourseQuestions(course).length : ((week && week.questions.length) || 0);
     var countInput = document.getElementById('play-count');
-    var max = (week && week.questions.length) ? week.questions.length : 1;
+    var max = poolSize || 1;
     countInput.max = max;
     var current = parseInt(countInput.value, 10) || max;
     if (current > max) countInput.value = max;
@@ -2450,6 +2465,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
 
   playCourseSelect.addEventListener('change', renderPlayWeekOptions);
   playWeekSelect.addEventListener('change', updatePlayCountMax);
+  document.getElementById('play-mix-weeks').addEventListener('change', updatePlayCountMax);
 
   var gameState = null;
   var LIVES = 3;
@@ -2477,8 +2493,8 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     };
   }
 
-  function launchGame(course, week, count, timerSeconds) {
-    var pool = week.questions.slice();
+  function launchGame(course, week, questionPool, count, timerSeconds, mixWeeks) {
+    var pool = questionPool.slice();
     if (week.randomOrder !== false) {
       for (var i = pool.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
@@ -2496,6 +2512,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
       timerSeconds: timerSeconds,
       courseId: course.id,
       weekId: week.id,
+      mixWeeks: !!mixWeeks,
       answered: false,
       log: []
     };
@@ -2512,23 +2529,29 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     var course = getCourse(playCourseSelect.value);
     var week = getWeek(course, playWeekSelect.value);
     var statusEl = document.getElementById('play-setup-status');
-    if (!week || week.questions.length === 0) {
-      statusEl.textContent = 'This week has no questions yet. Add some in Admin first.';
+    var mixWeeks = document.getElementById('play-mix-weeks').checked;
+    var pool = mixWeeks ? getAllCourseQuestions(course) : (week ? week.questions : []);
+    if (!week || pool.length === 0) {
+      statusEl.textContent = mixWeeks
+        ? 'This course has no questions yet. Add some in Admin first.'
+        : 'This week has no questions yet. Add some in Admin first.';
       statusEl.className = 'status-msg error';
       return;
     }
     var requested = parseInt(document.getElementById('play-count').value, 10) || 1;
-    var count = Math.min(requested, week.questions.length);
+    var count = Math.min(requested, pool.length);
     var timerSeconds = parseInt(document.getElementById('play-timer-seconds').value, 10) || 0;
-    launchGame(course, week, count, timerSeconds);
+    launchGame(course, week, pool, count, timerSeconds, mixWeeks);
   });
 
   document.getElementById('restart-game-btn').addEventListener('click', function () {
     var course = getCourse(gameState.courseId);
     var week = getWeek(course, gameState.weekId);
-    if (!week || week.questions.length === 0) return;
-    var count = Math.min(gameState.questions.length, week.questions.length);
-    launchGame(course, week, count, gameState.timerSeconds);
+    if (!week) return;
+    var pool = gameState.mixWeeks ? getAllCourseQuestions(course) : week.questions;
+    if (pool.length === 0) return;
+    var count = Math.min(gameState.questions.length, pool.length);
+    launchGame(course, week, pool, count, gameState.timerSeconds, gameState.mixWeeks);
   });
 
   var LIFE_ICON_SRC = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUBAMAAAB/pwA+AAAAJFBMVEXq5trY1MXOxrHMs5a6r5m0noOqj3KYhW+LcVVyVj1cQiwvIRR9S3/AAAAAuUlEQVR4nBXLsVEDMRBG4X/XImPOKzlm5uRxAeAa3As9EVAALTDQgXHgmDsUOkC7Ir8Vc9kLvkcv+XY9Py9vn8YR8XwntG9g04Bjl7QFd8wuhPKI0IZqqq4CXi66+Z4tG8LUq09j9R+wtgQvokBAt6NVbWtOu0z9IwHBTzzaw1drMfBJke5fHeCdbQF62gNhnAeT92QA4/cvV1AnsJvE5aJFIpccybyvIJIgdROASQwVBesG881hAPAPwQxWCglpsEgAAAAASUVORK5CYII=';
