@@ -657,6 +657,7 @@ ul.list li .actions button { font-size: 9px; padding: 4px 6px; }
 .choice-btn.correct::after { content: ' \2713'; color: var(--green); font-weight: bold; }
 .choice-btn.wrong::after { content: ' \2717'; color: var(--red); font-weight: bold; }
 .choice-btn:disabled { cursor: default; }
+.choice-btn.eliminated { opacity: 0.3; text-decoration: line-through; }
 
 .live-explanation {
   margin-top: 16px;
@@ -967,6 +968,11 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
         </label>
       </div>
       <div class="row" style="margin-top:8px; align-items:center;">
+        <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); cursor:pointer;">
+          <input type="checkbox" id="play-practice-mode"> Practice mode (no lives, untimed, unlimited retries per question)
+        </label>
+      </div>
+      <div class="row" style="margin-top:8px; align-items:center;">
         <button id="best-score-toggle-btn" class="ghost" type="button">BEST SCORE: OFF</button>
         <div id="top-score-indicator" style="font-size:12px;color:var(--muted);"></div>
       </div>
@@ -1022,6 +1028,9 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
         <div class="timer-text" id="timer-text"></div>
       </div>
       <div class="question-prompt" id="question-prompt"></div>
+      <div class="row" style="margin:8px 0;">
+        <button id="hint-btn" class="secondary hidden">HINT (50/50)</button>
+      </div>
       <div class="choices" id="choices-row"></div>
       <div class="live-explanation hidden" id="live-explanation"></div>
       <div class="row">
@@ -1284,6 +1293,8 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
 
     <div class="panel">
       <h2>BACKUP / TRANSFER</h2>
+      <p style="font-size:11px;color:var(--muted);margin-top:0;">Everything is stored only in this browser. Export regularly so you don't lose data if the browser cache is cleared or you switch computers.</p>
+      <div id="backup-reminder" class="status-msg"></div>
       <div class="row">
         <button id="export-btn" class="secondary">EXPORT ENTIRE BANK (.json)</button>
         <button id="export-course-btn" class="secondary">EXPORT SELECTED COURSE (.json)</button>
@@ -2189,8 +2200,38 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     window.print();
   });
 
+  var LAST_EXPORT_KEY = 'classArcadeLastExport';
+
+  function markBackupDone() {
+    localStorage.setItem(LAST_EXPORT_KEY, new Date().toISOString());
+    renderBackupReminder();
+  }
+
+  function renderBackupReminder() {
+    var el = document.getElementById('backup-reminder');
+    if (!el) return;
+    var last = localStorage.getItem(LAST_EXPORT_KEY);
+    if (!last) {
+      el.textContent = 'You have not exported a backup yet.';
+      el.className = 'status-msg error';
+      return;
+    }
+    var days = Math.floor((Date.now() - new Date(last).getTime()) / 86400000);
+    if (days >= 7) {
+      el.textContent = 'Last backup was ' + days + ' day' + (days === 1 ? '' : 's') + ' ago — consider exporting again.';
+      el.className = 'status-msg error';
+    } else if (days <= 0) {
+      el.textContent = 'Backed up today.';
+      el.className = 'status-msg ok';
+    } else {
+      el.textContent = 'Last backup: ' + days + ' day' + (days === 1 ? '' : 's') + ' ago.';
+      el.className = 'status-msg';
+    }
+  }
+
   document.getElementById('export-btn').addEventListener('click', function () {
     downloadJson(state, 'class-arcade-bank.json');
+    markBackupDone();
   });
 
   document.getElementById('export-course-btn').addEventListener('click', function () {
@@ -2202,6 +2243,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
       return;
     }
     downloadJson({ courses: [course] }, 'class-arcade-' + slugify(course.name) + '.json');
+    markBackupDone();
   });
 
   function mergeQuestionsInto(targetWeek, importedWeek) {
@@ -2652,7 +2694,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     setTimeout(function () { el.remove(); }, 900);
   }
 
-  function launchGame(course, week, questionPool, count, timerSeconds, mixWeeks) {
+  function launchGame(course, week, questionPool, count, timerSeconds, mixWeeks, practiceMode) {
     var pool = questionPool.slice();
     if (week.randomOrder !== false) {
       for (var i = pool.length - 1; i > 0; i--) {
@@ -2668,10 +2710,11 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
       streak: 0,
       gameOver: false,
       showExplanation: week.showExplanation !== false,
-      timerSeconds: timerSeconds,
+      timerSeconds: practiceMode ? 0 : timerSeconds,
       courseId: course.id,
       weekId: week.id,
       mixWeeks: !!mixWeeks,
+      practiceMode: !!practiceMode,
       answered: false,
       log: []
     };
@@ -2701,7 +2744,8 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     var requested = parseInt(document.getElementById('play-count').value, 10) || 1;
     var count = Math.min(requested, pool.length);
     var timerSeconds = parseInt(document.getElementById('play-timer-seconds').value, 10) || 0;
-    launchGame(course, week, pool, count, timerSeconds, mixWeeks);
+    var practiceMode = document.getElementById('play-practice-mode').checked;
+    launchGame(course, week, pool, count, timerSeconds, mixWeeks, practiceMode);
   });
 
   document.getElementById('restart-game-btn').addEventListener('click', function () {
@@ -2711,7 +2755,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     var pool = gameState.mixWeeks ? getAllCourseQuestions(course) : week.questions;
     if (pool.length === 0) return;
     var count = Math.min(gameState.questions.length, pool.length);
-    launchGame(course, week, pool, count, gameState.timerSeconds, gameState.mixWeeks);
+    launchGame(course, week, pool, count, gameState.timerSeconds, gameState.mixWeeks, gameState.practiceMode);
   });
 
   var LIFE_ICON_SRC = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUBAMAAAB/pwA+AAAAJFBMVEXq5trY1MXOxrHMs5a6r5m0noOqj3KYhW+LcVVyVj1cQiwvIRR9S3/AAAAAuUlEQVR4nBXLsVEDMRBG4X/XImPOKzlm5uRxAeAa3As9EVAALTDQgXHgmDsUOkC7Ir8Vc9kLvkcv+XY9Py9vn8YR8XwntG9g04Bjl7QFd8wuhPKI0IZqqq4CXi66+Z4tG8LUq09j9R+wtgQvokBAt6NVbWtOu0z9IwHBTzzaw1drMfBJke5fHeCdbQF62gNhnAeT92QA4/cvV1AnsJvE5aJFIpccybyvIJIgdROASQwVBesG881hAPAPwQxWCglpsEgAAAAASUVORK5CYII=';
@@ -2877,15 +2921,46 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     var explEl = document.getElementById('live-explanation');
     explEl.classList.add('hidden');
     explEl.innerHTML = '';
+    var hintBtn = document.getElementById('hint-btn');
+    hintBtn.classList.toggle('hidden', q.choices.length <= 2);
+    hintBtn.disabled = false;
     startQuestionTimer();
   }
 
+  document.getElementById('hint-btn').addEventListener('click', function () {
+    if (gameState.answered) return;
+    var q = gameState.questions[gameState.index];
+    var buttons = Array.from(document.querySelectorAll('#choices-row .choice-btn'));
+    var eliminable = buttons
+      .map(function (btn, idx) { return { btn: btn, idx: idx }; })
+      .filter(function (b) { return b.idx !== q.correctIndex && !b.btn.disabled; });
+    for (var i = eliminable.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = eliminable[i]; eliminable[i] = eliminable[j]; eliminable[j] = tmp;
+    }
+    eliminable.slice(0, eliminable.length - 1).forEach(function (b) {
+      b.btn.disabled = true;
+      b.btn.classList.add('eliminated');
+    });
+    this.disabled = true;
+  });
+
   function onChoiceClick(i) {
     if (gameState.answered) return;
-    gameState.answered = true;
-    clearQuestionTimer();
     var q = gameState.questions[gameState.index];
     var correct = i === q.correctIndex;
+
+    if (!correct && gameState.practiceMode) {
+      var wrongBtn = document.querySelectorAll('#choices-row .choice-btn')[i];
+      wrongBtn.disabled = true;
+      wrongBtn.classList.add('wrong');
+      playLifeLostSound();
+      return;
+    }
+
+    gameState.answered = true;
+    clearQuestionTimer();
+    document.getElementById('hint-btn').classList.add('hidden');
     var wasSuper = gameState.streak >= 3;
     if (correct) {
       gameState.score += wasSuper ? 2 : 1;
@@ -3129,6 +3204,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
   /* ---------- Init ---------- */
   renderAdmin();
   renderPlaySetup();
+  renderBackupReminder();
 })();
 </script>
 </body>
