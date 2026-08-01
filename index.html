@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Damien's Class Arcade</title>
+<title>Penelope's Learning Arcade</title>
 <style>
 @font-face {
   font-family: 'PixelArcade';
@@ -23,6 +23,32 @@
   --green: #33ff8c;
   --text: #eef0ff;
   --muted: #8888b0;
+}
+
+[data-theme="blocks"] {
+  --bg: #07090c;
+  --panel: #10151c;
+  --panel-edge: #2f3a45;
+  --yellow: #ffe14d;
+  --pink: #ff8c1a;
+  --cyan: #4de3ff;
+  --red: #ff4d4d;
+  --green: #4dffa0;
+  --text: #eaf2ff;
+  --muted: #7f8ab0;
+}
+
+[data-theme="plumber"] {
+  --bg: #170a0a;
+  --panel: #2a1414;
+  --panel-edge: #5a2a2a;
+  --yellow: #ffcc33;
+  --pink: #ff6b6b;
+  --cyan: #4a90d9;
+  --red: #e63946;
+  --green: #4caf50;
+  --text: #fff3e0;
+  --muted: #b0968a;
 }
 
 * { box-sizing: border-box; }
@@ -77,6 +103,13 @@ header.top h1 {
   cursor: pointer;
   min-width: 34px;
   text-align: center;
+}
+
+#theme-select {
+  width: auto;
+  font-size: 10px;
+  padding: 8px 10px;
+  font-family: 'PixelArcade', monospace;
 }
 
 .mascot-img.mascot-header {
@@ -168,6 +201,9 @@ button {
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
 }
+
+.mascot-wrap { display: flex; justify-content: center; }
+.mascot-img.mascot-end { width: 100px; height: 100px; }
 
 button:hover { filter: brightness(1.1); }
 button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(0,0,0,0.5); }
@@ -291,6 +327,70 @@ ul.list li .actions button { font-size: 9px; padding: 4px 6px; }
   to { background-position: 400% 50%; }
 }
 
+@keyframes cell-drop-in {
+  0% { transform: translateY(-10px); opacity: 0; }
+  60% { transform: translateY(2px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes cell-current-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(255,255,255,0.3); }
+  50% { box-shadow: 0 0 10px rgba(255,255,255,0.8); }
+}
+
+.blocks-track { display: flex; gap: 0; height: 100%; align-items: center; }
+.mushrooms-track { display: flex; gap: 5px; height: 100%; align-items: center; }
+
+.block-cell {
+  width: 16px; height: 16px;
+  background: #12162a;
+  border: 1px solid var(--panel-edge);
+  flex: 0 0 auto;
+  animation: cell-drop-in 0.3s ease-out;
+}
+.block-cell.correct { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 6px rgba(64,224,255,0.6); }
+.block-cell.wrong { background: #3a1f1f; border-color: #5a2a2a; }
+.block-cell.current { animation: cell-drop-in 0.3s ease-out, cell-current-pulse 0.8s ease-in-out infinite; }
+
+/* Plumber progress: mushroom power-ups (deliberately non-square, unlike Blocks) */
+.mushroom-cell {
+  width: 18px; height: 20px;
+  flex: 0 0 auto;
+  position: relative;
+  animation: cell-drop-in 0.3s ease-out;
+}
+.mushroom-cell .cap {
+  position: absolute; top: 0; left: 0;
+  width: 18px; height: 12px;
+  border-radius: 9px 9px 3px 3px;
+  background: #3f3f3f;
+}
+.mushroom-cell .stem {
+  position: absolute; bottom: 0; left: 4px;
+  width: 10px; height: 8px;
+  border-radius: 0 0 3px 3px;
+  background: #2b2b2b;
+}
+.mushroom-cell .spot {
+  position: absolute;
+  top: 3px;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+}
+.mushroom-cell .spot.l { left: 3px; }
+.mushroom-cell .spot.r { right: 3px; }
+
+.mushroom-cell.correct .cap { background: var(--red); box-shadow: 0 0 7px rgba(230,57,70,0.65); }
+.mushroom-cell.correct .stem { background: #ffe9c4; }
+.mushroom-cell.correct .spot { background: #fff; }
+
+.mushroom-cell.wrong { opacity: 0.4; }
+.mushroom-cell.wrong .cap { background: #4a4a4a; height: 8px; top: 4px; }
+.mushroom-cell.wrong .stem { background: #333; height: 6px; }
+.mushroom-cell.wrong .spot { background: rgba(255,255,255,0.1); top: 1px; }
+
+.mushroom-cell.current .cap { animation: cell-current-pulse 0.8s ease-in-out infinite; }
+
 .chase-strip {
   position: relative;
   height: 54px;
@@ -360,6 +460,126 @@ ul.list li .actions button { font-size: 9px; padding: 4px 6px; }
 
 .pac-ghost.scared { background: #2a3bff; box-shadow: 0 0 8px rgba(42,59,255,0.7); }
 .pac-ghost.scared .eye { background: #fff; }
+
+/* ---- Theme decoration visibility: only the active theme's set shows ---- */
+.theme-decor { display: none; }
+[data-theme="pac"] .theme-decor-pac { display: contents; }
+[data-theme="blocks"] .theme-decor-blocks { display: contents; }
+[data-theme="plumber"] .theme-decor-plumber { display: contents; }
+
+/* ---- Plumber theme: iconic mushrooms + a warp pipe chased by goomba-style creatures ---- */
+.deco-mushroom { width: 26px; height: 24px; top: 8px; }
+.deco-mushroom .cap {
+  position: absolute; top: 0; left: 0;
+  width: 26px; height: 15px;
+  border-radius: 13px 13px 4px 4px;
+  background: var(--red);
+  box-shadow: 0 0 8px rgba(230,57,70,0.55);
+}
+.deco-mushroom .stem {
+  position: absolute; bottom: 0; left: 6px;
+  width: 14px; height: 10px;
+  border-radius: 0 0 3px 3px;
+  background: #ffe9c4;
+}
+.deco-mushroom .spot { position: absolute; top: 4px; width: 5px; height: 5px; border-radius: 50%; background: #fff; }
+.deco-mushroom .spot.l { left: 4px; }
+.deco-mushroom .spot.r { right: 4px; }
+.deco-mushroom.alt .cap { background: var(--green); box-shadow: 0 0 8px rgba(76,175,80,0.55); }
+
+.deco-pipe { width: 30px; height: 32px; top: 4px; }
+.deco-pipe .rim {
+  position: absolute; top: 0; left: 0;
+  width: 30px; height: 9px;
+  border-radius: 3px;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(76,175,80,0.5);
+}
+.deco-pipe .body {
+  position: absolute; top: 7px; left: 4px;
+  width: 22px; height: 25px;
+  background: var(--green);
+  filter: brightness(0.85);
+}
+
+.goomba { width: 26px; height: 22px; top: 18px; }
+.goomba .cap {
+  position: absolute; top: 0; left: 0;
+  width: 26px; height: 17px;
+  background: #7a4a2a;
+  border-radius: 50% 50% 15% 15%;
+}
+.goomba .foot {
+  position: absolute; bottom: 0;
+  width: 9px; height: 6px;
+  background: #3a2414;
+  border-radius: 3px;
+}
+.goomba .foot.left { left: 2px; }
+.goomba .foot.right { right: 2px; }
+.goomba .eyebrow {
+  position: absolute; top: 6px;
+  width: 6px; height: 2px;
+  background: #2a1a0a;
+}
+.goomba .eyebrow.left { left: 5px; transform: rotate(15deg); }
+.goomba .eyebrow.right { right: 5px; transform: rotate(-15deg); }
+.goomba.squashed { transform: scaleY(0.35) translateY(70%); filter: grayscale(1); opacity: 0.6; }
+
+/* ---- Blocks theme: Tetris-style falling piece shapes ---- */
+.tetro-piece { width: 44px; height: 24px; top: 14px; }
+.tetro-piece .cell { position: absolute; width: 10px; height: 10px; border-radius: 2px; }
+.tetro-o .cell:nth-child(1) { left: 0; top: 0; }
+.tetro-o .cell:nth-child(2) { left: 11px; top: 0; }
+.tetro-o .cell:nth-child(3) { left: 0; top: 11px; }
+.tetro-o .cell:nth-child(4) { left: 11px; top: 11px; }
+.tetro-o .cell { background: var(--yellow); }
+
+.tetro-i .cell:nth-child(1) { left: 0; top: 6px; }
+.tetro-i .cell:nth-child(2) { left: 11px; top: 6px; }
+.tetro-i .cell:nth-child(3) { left: 22px; top: 6px; }
+.tetro-i .cell:nth-child(4) { left: 33px; top: 6px; }
+.tetro-i .cell { background: var(--cyan); }
+
+.tetro-t .cell:nth-child(1) { left: 0; top: 0; }
+.tetro-t .cell:nth-child(2) { left: 11px; top: 0; }
+.tetro-t .cell:nth-child(3) { left: 22px; top: 0; }
+.tetro-t .cell:nth-child(4) { left: 11px; top: 11px; }
+.tetro-t .cell { background: var(--pink); }
+
+.tetro-l .cell:nth-child(1) { left: 0; top: 0; }
+.tetro-l .cell:nth-child(2) { left: 0; top: 11px; }
+.tetro-l .cell:nth-child(3) { left: 0; top: 22px; }
+.tetro-l .cell:nth-child(4) { left: 11px; top: 22px; }
+.tetro-l .cell { background: var(--red); }
+
+.line-clear-row {
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+  margin: 8px auto;
+  max-width: 300px;
+}
+.line-clear-cell {
+  width: 22px; height: 22px;
+  border-radius: 2px;
+  animation: line-clear-flash 2.6s ease-in-out infinite;
+}
+.line-clear-cell:nth-child(1) { background: var(--cyan); animation-delay: 0s; }
+.line-clear-cell:nth-child(2) { background: var(--yellow); animation-delay: 0.08s; }
+.line-clear-cell:nth-child(3) { background: var(--pink); animation-delay: 0.16s; }
+.line-clear-cell:nth-child(4) { background: var(--red); animation-delay: 0.24s; }
+.line-clear-cell:nth-child(5) { background: var(--green); animation-delay: 0.32s; }
+.line-clear-cell:nth-child(6) { background: var(--cyan); animation-delay: 0.4s; }
+.line-clear-cell:nth-child(7) { background: var(--yellow); animation-delay: 0.48s; }
+.line-clear-cell:nth-child(8) { background: var(--pink); animation-delay: 0.56s; }
+@keyframes line-clear-flash {
+  0% { transform: translateY(-26px); opacity: 0; }
+  14% { transform: translateY(0); opacity: 1; }
+  70% { transform: translateY(0) scale(1); opacity: 1; }
+  82% { opacity: 0.3; background: #fff; transform: scale(0.85); }
+  94%, 100% { opacity: 0; transform: translateY(-26px) scale(0.85); }
+}
 
 .timer-wrap { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
 .timer-bar {
@@ -442,17 +662,171 @@ ul.list li .actions button { font-size: 9px; padding: 4px 6px; }
 .perfect-round-text {
   font-family: 'PixelArcade', monospace;
   font-size: 18px;
+  display: inline-block;
+  padding: 10px 18px;
+  margin-bottom: 10px;
+  position: relative;
+}
+.perfect-round-banner .chase-strip { border: none; height: 46px; margin: 0 auto; max-width: 320px; }
+
+/* Pac: neon arcade bonus-flash marquee */
+[data-theme="pac"] .perfect-round-text {
   color: #fff;
   background: linear-gradient(90deg, var(--yellow), var(--pink), var(--cyan), var(--yellow));
   background-size: 300% 100%;
   animation: super-badge-shift 1.2s linear infinite;
-  display: inline-block;
-  padding: 10px 18px;
   border: 2px solid #fff;
   box-shadow: 0 0 14px rgba(255,255,255,0.6);
-  margin-bottom: 10px;
 }
-.perfect-round-banner .chase-strip { border: none; height: 46px; margin: 0 auto; max-width: 320px; }
+
+/* Blocks: hard-edged tetromino color bands stepping across, no smooth blending */
+[data-theme="blocks"] .perfect-round-text {
+  color: #08121a;
+  background: linear-gradient(90deg,
+    var(--cyan) 0 25%, var(--pink) 25% 50%, var(--yellow) 50% 75%, var(--green) 75% 100%);
+  background-size: 400% 100%;
+  animation: blocks-badge-step 1s steps(4) infinite;
+  border: 2px solid var(--text);
+  box-shadow: 0 0 10px rgba(77,227,255,0.5);
+}
+@keyframes blocks-badge-step {
+  from { background-position: 0% 0; }
+  to { background-position: 400% 0; }
+}
+
+/* Plumber: gold coin/course-clear badge with a shine sweep */
+[data-theme="plumber"] .perfect-round-text {
+  color: #5a1a1a;
+  background: linear-gradient(180deg, #ffe37d, #f4a623);
+  border: 3px solid var(--red);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.6);
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+  overflow: hidden;
+  animation: plumber-badge-pulse 0.9s ease-in-out infinite;
+}
+[data-theme="plumber"] .perfect-round-text::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -60%;
+  width: 35%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.85), transparent);
+  animation: plumber-badge-shine 1.6s linear infinite;
+}
+@keyframes plumber-badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+@keyframes plumber-badge-shine {
+  from { left: -60%; }
+  to { left: 140%; }
+}
+
+/* ---- Themed game-over scenes (shown only on non-perfect rounds) ---- */
+.game-over-decor { margin: 10px 0 4px; }
+.go-scene {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  height: 46px;
+}
+
+/* Pac: ghosts closing in on a defeated Pac-Man */
+.go-pac-loser {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--yellow);
+  opacity: 0.45;
+  clip-path: polygon(50% 50%, 0 15%, 0 0, 100% 0, 100% 100%, 0 100%, 0 85%);
+  animation: go-fade-pulse 1.6s ease-in-out infinite;
+}
+.go-ghost {
+  position: relative;
+  width: 24px; height: 26px;
+  border-radius: 12px 12px 0 0;
+  animation: go-hover 1.2s ease-in-out infinite;
+}
+.go-ghost::after {
+  content: '';
+  position: absolute;
+  bottom: -5px; left: 0;
+  width: 100%; height: 6px;
+  background: inherit;
+  clip-path: polygon(0 0, 16.6% 100%, 33.3% 0, 50% 100%, 66.6% 0, 83.3% 100%, 100% 0);
+}
+.go-ghost .eye {
+  position: absolute; top: 8px;
+  width: 7px; height: 8px;
+  background: #fff;
+  border-radius: 50%;
+}
+.go-ghost .eye.left { left: 4px; }
+.go-ghost .eye.right { left: 13px; }
+.go-ghost .pupil {
+  position: absolute; top: 2px; left: 1px;
+  width: 4px; height: 4px;
+  background: #1a1a2e;
+  border-radius: 50%;
+}
+.go-ghost-1 { background: var(--red); animation-delay: 0s; }
+.go-ghost-2 { background: var(--pink); animation-delay: 0.2s; }
+.go-ghost-3 { background: var(--cyan); animation-delay: 0.4s; }
+@keyframes go-hover {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes go-fade-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.15; }
+}
+
+/* Blocks: stacked-to-the-top "topped out" board */
+.go-topout { gap: 3px; align-items: flex-end; }
+.go-stack-col { display: flex; flex-direction: column-reverse; gap: 2px; }
+.go-stack-col span {
+  width: 13px; height: 9px;
+  border-radius: 2px;
+  background: #4a5568;
+}
+.go-stack-col:nth-child(odd) span { background: #5a6478; }
+.go-stack-col span:last-child { background: var(--red); opacity: 0.85; }
+
+/* Plumber: downed plumber at the foot of the flagpole, goomba taunting */
+.go-flagpole { position: relative; width: 20px; height: 44px; }
+.go-flagpole .pole {
+  position: absolute; bottom: 0; left: 9px;
+  width: 3px; height: 44px;
+  background: #9aa0a6;
+}
+.go-flagpole .flag {
+  position: absolute; top: 4px; left: 12px;
+  width: 0; height: 0;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 12px solid var(--green);
+}
+.go-downed-mushroom {
+  position: relative;
+  width: 26px; height: 24px;
+  opacity: 0.5;
+  filter: grayscale(0.8);
+  transform: rotate(90deg);
+}
+.go-downed-mushroom .cap {
+  position: absolute; top: 0; left: 0;
+  width: 26px; height: 15px;
+  border-radius: 13px 13px 4px 4px;
+  background: var(--red);
+}
+.go-downed-mushroom .stem {
+  position: absolute; bottom: 0; left: 6px;
+  width: 14px; height: 10px;
+  border-radius: 0 0 3px 3px;
+  background: #ffe9c4;
+}
+/* Keep the goomba as its own positioning context outside the chase strip */
+.go-goomba { position: relative; top: auto; left: auto; flex: 0 0 auto; }
+.go-taunt { animation: go-hover 0.9s ease-in-out infinite; }
 .final-score-sub {
   font-size: 14px;
   color: var(--muted);
@@ -499,7 +873,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
 
   <header class="top">
     <div class="brand">
-      <h1 class="pixel">DAMIEN'S CLASS ARCADE</h1>
+      <h1 class="pixel">PENELOPE'S LEARNING ARCADE</h1>
       <img class="mascot-img mascot-header mascot-bob" alt="Class mascot" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoBAMAAAB+0KVeAAAAMFBMVEXn6uDh39Pb18rPzL/Lw7DGtZy5s6K1pY6sln2cjnuSfWV9e2+BaE5rYlRZRDAnHBPiMh2jAAACI0lEQVR4nD1SsW4UMRB9M1mQKJIb7wUapLs9X1IiJSFCokAk+QMiOnoKSiT+Ar4AiYKaAvEB+QJyXJ/E60t/a29Il5wHeTeksZ7fvPGMZx6tPZs/+gXg7Pc3wGgEAMYO0CEApZAxkkmgHPccTSSfAla8/M75Arx4Sx2LQt9ZmNv8wJNPNwc/uyh/yLGhB/R9NbruOMMfLUg4gdaOJwzTKwEI8Mrpwwk93vXynyTAnGJfjLSDeyU0Ds3iUAMOx/dkiOlaWGDkcrf/0Rwxguo01xZwR71ypEuIO4saB2G28aAnpxrhYLEXa1RX864XDhpvZ+7Er36E5rJaz62gsEv5o1Gri20XDFZ31Y1qiwhyfheNN0JGitxSa+WCoR6ILisLNBrNkoZlbCah7WdYhBhNcNaQCacw/USK4KMuppsjqDb1cEWiEUVCHOwNhkeOx1/i36cCsiiQgO3XgDVp1ISbLp0BaXc6SOVCcusdqZsho5iGdpJBCMXX1uxrSB7V53KnF4Jn4KTOw52XyayiAKJFCalmfIzk1hcxZLMQMUR8IzC2niMtJLsmb0HqrYqAUxdRU3YNGJxMlUNTrbXqdks8ncSyqyjjbtk9nvRGTIkbQgWwARMMKo1oSq8teeRvc87wClzy1puQx6mQziFAvXRh4+rOnsQjVMkjnSiak3FtwNDIDEZySSM8kyVAaJDTjYGHaAWPgR1FEANs1fLz4kC0EvIMi3/1rujwyHPn+wAAAABJRU5ErkJggg==" />
     </div>
     <div class="header-right">
@@ -509,6 +883,11 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
         <button id="scale-up-btn" class="ghost" title="Larger text">A+</button>
       </div>
       <button id="mute-toggle-btn" class="ghost" title="Mute/unmute sound">SOUND: ON</button>
+      <select id="theme-select" title="Switch theme">
+        <option value="pac">PAC</option>
+        <option value="blocks">BLOCKS</option>
+        <option value="plumber">PLUMBER</option>
+      </select>
       <nav class="tabs">
         <button class="tab-btn active" data-tab="play">PLAY</button>
         <button class="tab-btn" data-tab="admin">ADMIN</button>
@@ -539,7 +918,10 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
           <input type="number" id="play-timer-seconds" min="0" value="0">
         </div>
       </div>
-      <div id="top-score-indicator" style="font-size:12px;color:var(--muted);margin-top:8px;"></div>
+      <div class="row" style="margin-top:8px; align-items:center;">
+        <button id="best-score-toggle-btn" class="ghost" type="button">BEST SCORE: OFF</button>
+        <div id="top-score-indicator" style="font-size:12px;color:var(--muted);"></div>
+      </div>
       <div class="row" style="margin-top:16px;">
         <button id="start-game-btn">START GAME</button>
       </div>
@@ -547,10 +929,24 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     </div>
 
     <div id="chase-strip" class="chase-strip">
-      <div class="chase-actor pac-decor mouth-open pacman-mouth"></div>
-      <div class="chase-actor pac-ghost pac-ghost-red"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
-      <div class="chase-actor pac-ghost pac-ghost-pink"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
-      <div class="chase-actor pac-ghost pac-ghost-cyan"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
+      <div class="theme-decor theme-decor-pac">
+        <div class="chase-actor pac-decor mouth-open pacman-mouth"></div>
+        <div class="chase-actor pac-ghost pac-ghost-red"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
+        <div class="chase-actor pac-ghost pac-ghost-pink"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
+        <div class="chase-actor pac-ghost pac-ghost-cyan"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
+      </div>
+      <div class="theme-decor theme-decor-blocks">
+        <div class="chase-actor tetro-piece tetro-i" style="animation-delay:-4s;"><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span></div>
+        <div class="chase-actor tetro-piece tetro-o" style="animation-delay:-3.2s;"><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span></div>
+        <div class="chase-actor tetro-piece tetro-t" style="animation-delay:-2.4s;"><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span></div>
+        <div class="chase-actor tetro-piece tetro-l" style="animation-delay:-1.6s;"><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span></div>
+      </div>
+      <div class="theme-decor theme-decor-plumber">
+        <div class="chase-actor deco-pipe" style="animation-delay:-4s;"><span class="rim"></span><span class="body"></span></div>
+        <div class="chase-actor deco-mushroom" style="animation-delay:-3.2s;"><span class="cap"></span><span class="spot l"></span><span class="spot r"></span><span class="stem"></span></div>
+        <div class="chase-actor deco-mushroom alt" style="animation-delay:-2.4s;"><span class="cap"></span><span class="spot l"></span><span class="spot r"></span><span class="stem"></span></div>
+        <div class="chase-actor goomba" style="animation-delay:-1.6s;"><span class="cap"></span><span class="foot left"></span><span class="foot right"></span><span class="eyebrow left"></span><span class="eyebrow right"></span></div>
+      </div>
     </div>
 
     <div id="game-screen">
@@ -561,8 +957,16 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
           <div class="super-badge hidden" id="super-badge">SUPER! x2</div>
         </div>
         <div class="pellets-wrap" id="pellets-wrap">
-          <div class="pellets" id="pellets-row"></div>
-          <div class="pacman-sprite mouth-open pacman-mouth" id="pacman-sprite"></div>
+          <div class="theme-decor theme-decor-pac">
+            <div class="pellets" id="pellets-row"></div>
+            <div class="pacman-sprite mouth-open pacman-mouth" id="pacman-sprite"></div>
+          </div>
+          <div class="theme-decor theme-decor-blocks">
+            <div class="blocks-track" id="blocks-track"></div>
+          </div>
+          <div class="theme-decor theme-decor-plumber">
+            <div class="mushrooms-track" id="mushrooms-track"></div>
+          </div>
         </div>
       </div>
       <div class="timer-wrap hidden" id="timer-wrap">
@@ -588,11 +992,58 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
 
       <div class="perfect-round-banner hidden" id="perfect-round-banner">
         <div class="perfect-round-text">PERFECT ROUND!</div>
-        <div class="chase-strip">
-          <div class="chase-actor pac-decor mouth-open pacman-mouth"></div>
-          <div class="chase-actor pac-ghost pac-ghost-red scared"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
-          <div class="chase-actor pac-ghost pac-ghost-pink scared"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
-          <div class="chase-actor pac-ghost pac-ghost-cyan scared"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
+
+        <div class="theme-decor theme-decor-pac">
+          <div class="chase-strip">
+            <div class="chase-actor pac-decor mouth-open pacman-mouth"></div>
+            <div class="chase-actor pac-ghost pac-ghost-red scared"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
+            <div class="chase-actor pac-ghost pac-ghost-pink scared"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
+            <div class="chase-actor pac-ghost pac-ghost-cyan scared"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
+          </div>
+        </div>
+
+        <div class="theme-decor theme-decor-blocks">
+          <div class="line-clear-row">
+            <div class="line-clear-cell"></div><div class="line-clear-cell"></div><div class="line-clear-cell"></div><div class="line-clear-cell"></div>
+            <div class="line-clear-cell"></div><div class="line-clear-cell"></div><div class="line-clear-cell"></div><div class="line-clear-cell"></div>
+          </div>
+        </div>
+
+        <div class="theme-decor theme-decor-plumber">
+          <div class="chase-strip">
+            <div class="chase-actor deco-mushroom" style="animation-delay:-4s;"><span class="cap"></span><span class="spot l"></span><span class="spot r"></span><span class="stem"></span></div>
+            <div class="chase-actor deco-mushroom alt" style="animation-delay:-3.2s;"><span class="cap"></span><span class="spot l"></span><span class="spot r"></span><span class="stem"></span></div>
+            <div class="chase-actor goomba squashed" style="animation-delay:-2.4s;"><span class="cap"></span><span class="foot left"></span><span class="foot right"></span><span class="eyebrow left"></span><span class="eyebrow right"></span></div>
+            <div class="chase-actor goomba squashed" style="animation-delay:-1.6s;"><span class="cap"></span><span class="foot left"></span><span class="foot right"></span><span class="eyebrow left"></span><span class="eyebrow right"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="game-over-decor hidden" id="game-over-decor">
+        <div class="theme-decor theme-decor-pac">
+          <div class="go-scene">
+            <div class="go-pac-loser"></div>
+            <div class="go-ghost go-ghost-1"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
+            <div class="go-ghost go-ghost-2"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
+            <div class="go-ghost go-ghost-3"><span class="eye left"><span class="pupil"></span></span><span class="eye right"><span class="pupil"></span></span></div>
+          </div>
+        </div>
+        <div class="theme-decor theme-decor-blocks">
+          <div class="go-scene go-topout">
+            <div class="go-stack-col"><span></span><span></span><span></span><span></span></div>
+            <div class="go-stack-col"><span></span><span></span><span></span></div>
+            <div class="go-stack-col"><span></span><span></span><span></span><span></span></div>
+            <div class="go-stack-col"><span></span><span></span></div>
+            <div class="go-stack-col"><span></span><span></span><span></span><span></span></div>
+            <div class="go-stack-col"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+        <div class="theme-decor theme-decor-plumber">
+          <div class="go-scene">
+            <div class="go-flagpole"><span class="pole"></span><span class="flag"></span></div>
+            <div class="go-downed-mushroom"><span class="cap"></span><span class="stem"></span></div>
+            <div class="goomba go-goomba go-taunt"><span class="cap"></span><span class="foot left"></span><span class="foot right"></span><span class="eyebrow left"></span><span class="eyebrow right"></span></div>
+          </div>
         </div>
       </div>
 
@@ -603,8 +1054,8 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
         <h3 style="font-size:12px;color:var(--cyan);margin:0 0 10px;">SAVE THIS SCORE (optional)</h3>
         <div class="row">
           <div class="col">
-            <label for="score-label-input">Label (e.g. Period 3 &mdash; Fall 2026)</label>
-            <input type="text" id="score-label-input" placeholder="Period 3 &mdash; Fall 2026">
+            <label for="score-label-input">Label (e.g. Semester 1 &mdash; Fall 2026)</label>
+            <input type="text" id="score-label-input" placeholder="Semester 1 &mdash; Fall 2026">
           </div>
         </div>
         <div class="row" style="margin-top:10px;">
@@ -661,10 +1112,13 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
 
     <div class="panel" id="week-history-panel">
       <h2>GAME HISTORY (selected week)</h2>
+      <p style="font-size:11px;color:var(--muted);margin-top:0;">Click a game below to select it, then generate a tip sheet from its wrong answers.</p>
       <div id="week-history-list"></div>
       <div class="row" style="margin-top:10px;">
         <button id="clear-week-history-btn" class="danger">CLEAR HISTORY</button>
+        <button id="generate-tips-btn" class="secondary">GENERATE IMPROVEMENT TIPS</button>
       </div>
+      <div id="tips-status" class="status-msg"></div>
     </div>
 
     <div class="panel" id="questions-panel">
@@ -929,6 +1383,10 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     return audioCtx;
   }
 
+  function currentThemeId() {
+    return document.documentElement.getAttribute('data-theme') || 'pac';
+  }
+
   function beep(freq, startTime, duration, type, peakGain) {
     if (soundMuted) return;
     var ctx = getAudioCtx();
@@ -946,12 +1404,44 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
   }
 
   function playCorrectSound() {
+    if (currentThemeId() === 'blocks') {
+      // Quick "piece rotate" blip instead of the Pac-Man chime
+      beep(1046.5, 0, 0.06, 'square', 0.16);
+      beep(1318.5, 0.05, 0.08, 'square', 0.14);
+      return;
+    }
+    if (currentThemeId() === 'plumber') {
+      // Bright two-note "coin collected" ding
+      beep(987.77, 0, 0.07, 'square', 0.16);
+      beep(1567.98, 0.06, 0.22, 'square', 0.16);
+      return;
+    }
     beep(880, 0, 0.12, 'square', 0.15);
     beep(1318.5, 0.1, 0.18, 'square', 0.15);
   }
 
   function playLifeLostSound() {
     if (soundMuted) return;
+
+    if (currentThemeId() === 'blocks') {
+      // Short harsh "invalid move" buzzer instead of the Pac-Man death wobble
+      beep(196, 0, 0.09, 'square', 0.2);
+      beep(146.83, 0.09, 0.09, 'square', 0.2);
+      beep(196, 0.18, 0.09, 'square', 0.2);
+      beep(110, 0.27, 0.18, 'square', 0.2);
+      return;
+    }
+
+    if (currentThemeId() === 'plumber') {
+      // Tumbling "power-down" — quick descending shrink
+      beep(783.99, 0, 0.08, 'square', 0.18);
+      beep(587.33, 0.07, 0.08, 'square', 0.18);
+      beep(466.16, 0.14, 0.08, 'square', 0.18);
+      beep(349.23, 0.21, 0.1, 'square', 0.18);
+      beep(261.63, 0.3, 0.22, 'square', 0.18);
+      return;
+    }
+
     var ctx = getAudioCtx();
     var t0 = ctx.currentTime;
     var duration = 1.0;
@@ -978,6 +1468,23 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
   }
 
   function playGameOverSound() {
+    if (currentThemeId() === 'blocks') {
+      // Somber descending stinger instead of the ascending arcade fanfare
+      beep(659.25, 0, 0.18, 'square', 0.16);
+      beep(587.33, 0.16, 0.18, 'square', 0.16);
+      beep(523.25, 0.32, 0.18, 'square', 0.16);
+      beep(392.0, 0.48, 0.4, 'square', 0.18);
+      return;
+    }
+    if (currentThemeId() === 'plumber') {
+      // Deflating "level failed" slide-down
+      beep(523.25, 0, 0.14, 'triangle', 0.18);
+      beep(493.88, 0.13, 0.14, 'triangle', 0.18);
+      beep(392.0, 0.26, 0.16, 'triangle', 0.18);
+      beep(311.13, 0.42, 0.18, 'triangle', 0.18);
+      beep(261.63, 0.6, 0.45, 'triangle', 0.2);
+      return;
+    }
     beep(523.25, 0, 0.15, 'square', 0.15);
     beep(659.25, 0.15, 0.15, 'square', 0.15);
     beep(783.99, 0.3, 0.15, 'square', 0.15);
@@ -985,6 +1492,26 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
   }
 
   function playPerfectRoundSound() {
+    if (currentThemeId() === 'blocks') {
+      // Bright, fast "line clear" arpeggio
+      beep(523.25, 0, 0.07, 'square', 0.16);
+      beep(659.25, 0.06, 0.07, 'square', 0.16);
+      beep(783.99, 0.12, 0.07, 'square', 0.16);
+      beep(1046.5, 0.18, 0.07, 'square', 0.16);
+      beep(1318.5, 0.24, 0.4, 'square', 0.2);
+      return;
+    }
+    if (currentThemeId() === 'plumber') {
+      // Bouncy "course clear" fanfare (original phrasing, genre-inspired)
+      beep(392.0, 0, 0.1, 'square', 0.17);
+      beep(523.25, 0.1, 0.1, 'square', 0.17);
+      beep(659.25, 0.2, 0.1, 'square', 0.17);
+      beep(783.99, 0.3, 0.1, 'square', 0.17);
+      beep(1046.5, 0.4, 0.14, 'square', 0.19);
+      beep(783.99, 0.56, 0.1, 'square', 0.17);
+      beep(1046.5, 0.66, 0.5, 'square', 0.2);
+      return;
+    }
     beep(523.25, 0, 0.12, 'square', 0.16);
     beep(659.25, 0.12, 0.12, 'square', 0.16);
     beep(783.99, 0.24, 0.12, 'square', 0.16);
@@ -1015,6 +1542,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
 
   var selectedCourseId = state.courses[0] ? state.courses[0].id : null;
   var selectedWeekId = null;
+  var selectedHistoryId = null;
   (function initWeek() {
     var c = getCourse(selectedCourseId);
     if (c && c.weeks[0]) selectedWeekId = c.weeks[0].id;
@@ -1557,8 +2085,8 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
   });
 
   /* ---------- Export / Import ---------- */
-  function downloadJson(data, filename) {
-    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  function downloadBlob(content, filename, mimeType) {
+    var blob = new Blob([content], { type: mimeType });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
@@ -1567,6 +2095,10 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+
+  function downloadJson(data, filename) {
+    downloadBlob(JSON.stringify(data, null, 2), filename, 'application/json');
   }
 
   function slugify(text) {
@@ -1698,8 +2230,9 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     var course = getCourse(selectedCourseId);
     var week = getWeek(course, selectedWeekId);
     var container = document.getElementById('week-history-list');
-    if (!week) { container.innerHTML = ''; return; }
+    if (!week) { container.innerHTML = ''; selectedHistoryId = null; return; }
     var hist = (week.history || []).slice().reverse();
+    if (!hist.some(function (h) { return h.id === selectedHistoryId; })) selectedHistoryId = null;
     if (hist.length === 0) {
       container.innerHTML = '<p style="font-size:11px;color:var(--muted);">No games played yet for this week.</p>';
       return;
@@ -1707,12 +2240,30 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     var html = '<ul class="list">';
     hist.forEach(function (h) {
       var dateStr = new Date(h.date).toLocaleString();
-      html += '<li><span>' + h.score + '/' + h.total + ' (' + h.correctCount + ' correct)' +
+      html += '<li data-id="' + h.id + '" class="' + (h.id === selectedHistoryId ? 'selected' : '') + '"><span>' + h.score + '/' + h.total + ' (' + h.correctCount + ' correct)' +
         (h.outOfLives ? ' &mdash; out of lives' : '') + '</span>' +
-        '<span class="meta">' + dateStr + '</span></li>';
+        '<span class="meta">' + dateStr + '</span>' +
+        '<span class="actions"><button data-act="del-history" data-id="' + h.id + '" class="danger">DEL</button></span></li>';
     });
     html += '</ul>';
     container.innerHTML = html;
+    container.querySelectorAll('li[data-id]').forEach(function (li) {
+      li.addEventListener('click', function (ev) {
+        if (ev.target.dataset.act) return;
+        selectedHistoryId = li.dataset.id;
+        renderWeekHistory();
+      });
+    });
+    container.querySelectorAll('[data-act="del-history"]').forEach(function (btn) {
+      btn.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        if (!confirm('Delete this game from history?')) return;
+        week.history = week.history.filter(function (h) { return h.id !== btn.dataset.id; });
+        if (selectedHistoryId === btn.dataset.id) selectedHistoryId = null;
+        persist();
+        renderWeekHistory();
+      });
+    });
   }
 
   document.getElementById('clear-week-history-btn').addEventListener('click', function () {
@@ -1723,6 +2274,79 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     week.history = [];
     persist();
     renderWeekHistory();
+  });
+
+  document.getElementById('generate-tips-btn').addEventListener('click', function () {
+    var statusEl = document.getElementById('tips-status');
+    var course = getCourse(selectedCourseId);
+    var week = getWeek(course, selectedWeekId);
+    if (!week) { statusEl.textContent = 'Select a course and week first.'; statusEl.className = 'status-msg error'; return; }
+    if (!selectedHistoryId) { statusEl.textContent = 'Select a game from the history list first.'; statusEl.className = 'status-msg error'; return; }
+    var entry = (week.history || []).find(function (h) { return h.id === selectedHistoryId; });
+    if (!entry) { statusEl.textContent = 'That game entry could not be found.'; statusEl.className = 'status-msg error'; return; }
+
+    var wrongDetails = (entry.details || []).filter(function (d) { return !d.correct; });
+    if (wrongDetails.length === 0) {
+      statusEl.textContent = 'Perfect round — nothing to analyze!';
+      statusEl.className = 'status-msg ok';
+      return;
+    }
+
+    var apiKey = aiApiKeyInput.value.trim();
+    if (!apiKey) { statusEl.textContent = 'Enter your Anthropic API key in the AI generator section above.'; statusEl.className = 'status-msg error'; return; }
+
+    statusEl.textContent = 'Generating tip sheet…';
+    statusEl.className = 'status-msg';
+
+    var systemPrompt = 'You are a teaching assistant analyzing one student quiz session to help them improve. ' +
+      'You will be given the questions the student got WRONG (their answer, the correct answer, and an explanation where available), plus overall score context. ' +
+      'Respond with ONLY a well-formatted Markdown document (not JSON, no code fences around the whole thing) containing: ' +
+      'a short performance summary, a brief per-missed-question explanation of the concept in simple terms, and a short list of general study resource TYPES or topics to review. ' +
+      'Do not fabricate specific third-party URLs, book titles, or resources you are not certain exist — suggest general topics/strategies instead (e.g. "review your notes on JOIN types", "practice writing WHERE clauses"), never invented links.';
+
+    var userPrompt = 'Course: ' + course.name + '\nWeek/topic: ' + week.label +
+      '\nScore: ' + entry.score + '/' + entry.total + ' (' + entry.correctCount + ' correct)' +
+      (entry.outOfLives ? '\nGame ended early: ran out of lives' : '') +
+      '\n\nQuestions missed:\n' + wrongDetails.map(function (d, i) {
+        return (i + 1) + '. ' + d.prompt + '\n   Student answered: ' + d.chosenText + '\n   Correct answer: ' + d.correctText +
+          (d.explanation ? '\n   Explanation: ' + d.explanation : '');
+      }).join('\n');
+
+    fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-5',
+        max_tokens: 2000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    })
+      .then(function (res) {
+        if (!res.ok) return res.text().then(function (t) { throw new Error('API error ' + res.status + ': ' + t); });
+        return res.json();
+      })
+      .then(function (data) {
+        var textBlock = (data.content || []).find(function (b) { return b.type === 'text' && b.text; });
+        var text = textBlock && textBlock.text;
+        if (!text) {
+          var reason = data.stop_reason ? ' (stop_reason: ' + data.stop_reason + ')' : '';
+          throw new Error('Empty response from API' + reason + '.');
+        }
+        var dateStamp = new Date(entry.date).toISOString().slice(0, 10);
+        downloadBlob(text.trim(), 'tips-' + slugify(week.label) + '-' + dateStamp + '.md', 'text/markdown');
+        statusEl.textContent = 'Tip sheet downloaded.';
+        statusEl.className = 'status-msg ok';
+      })
+      .catch(function (err) {
+        statusEl.textContent = 'Failed: ' + err.message;
+        statusEl.className = 'status-msg error';
+      });
   });
 
   function renderAdmin() {
@@ -1789,9 +2413,10 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
   }
 
   function renderTopScoreIndicator() {
+    var el = document.getElementById('top-score-indicator');
+    if (!showBestScore) { el.textContent = ''; return; }
     var course = getCourse(playCourseSelect.value);
     var week = getWeek(course, playWeekSelect.value);
-    var el = document.getElementById('top-score-indicator');
     if (!week) { el.textContent = ''; return; }
     var sorted = getSortedScores(week);
     if (sorted.length === 0) { el.textContent = ''; return; }
@@ -1919,6 +2544,40 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     requestAnimationFrame(positionPacman);
   }
 
+  function questionCellStatus(i) {
+    if (i < gameState.log.length) return gameState.log[i].correct ? 'correct' : 'wrong';
+    return i === gameState.index ? 'current' : 'pending';
+  }
+
+  function renderBlocksTrack() {
+    var row = document.getElementById('blocks-track');
+    if (!row) return;
+    row.innerHTML = '';
+    gameState.questions.forEach(function (q, i) {
+      var cell = document.createElement('div');
+      cell.className = 'block-cell ' + questionCellStatus(i);
+      row.appendChild(cell);
+    });
+  }
+
+  function renderMushroomsTrack() {
+    var row = document.getElementById('mushrooms-track');
+    if (!row) return;
+    row.innerHTML = '';
+    gameState.questions.forEach(function (q, i) {
+      var cell = document.createElement('div');
+      cell.className = 'mushroom-cell ' + questionCellStatus(i);
+      cell.innerHTML = '<span class="cap"></span><span class="spot l"></span><span class="spot r"></span><span class="stem"></span>';
+      row.appendChild(cell);
+    });
+  }
+
+  function renderProgressTrack() {
+    renderPellets();
+    renderBlocksTrack();
+    renderMushroomsTrack();
+  }
+
   function positionPacman() {
     var wrap = document.getElementById('pellets-wrap');
     var row = document.getElementById('pellets-row');
@@ -1987,6 +2646,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
 
     gameState.log.push({ question: q, chosenIndex: -1, correct: false });
     renderLives();
+    renderProgressTrack();
     updateSuperMode();
 
     if (gameState.showExplanation && q.explanation) {
@@ -2004,7 +2664,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     document.getElementById('question-prompt').textContent =
       'Q' + (gameState.index + 1) + '/' + gameState.questions.length + ': ' + q.prompt;
     renderLives();
-    renderPellets();
+    renderProgressTrack();
 
     var choicesRow = document.getElementById('choices-row');
     choicesRow.innerHTML = '';
@@ -2052,6 +2712,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     gameState.log.push({ question: q, chosenIndex: i, correct: correct });
     document.getElementById('score-val').textContent = gameState.score;
     renderLives();
+    renderProgressTrack();
     updateSuperMode();
 
     if (gameState.showExplanation && q.explanation) {
@@ -2128,6 +2789,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
 
     var isPerfect = gameState.questions.length > 0 && correctCount === gameState.questions.length;
     document.getElementById('perfect-round-banner').classList.toggle('hidden', !isPerfect);
+    document.getElementById('game-over-decor').classList.toggle('hidden', isPerfect);
     if (isPerfect) playPerfectRoundSound(); else playGameOverSound();
 
     document.getElementById('score-label-input').value = '';
@@ -2139,7 +2801,17 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
       if (!Array.isArray(endWeek.history)) endWeek.history = [];
       endWeek.history.push({
         id: uid(), date: new Date().toISOString(), score: gameState.score,
-        total: gameState.questions.length, correctCount: correctCount, outOfLives: outOfLives
+        total: gameState.questions.length, correctCount: correctCount, outOfLives: outOfLives,
+        details: gameState.log.map(function (entry) {
+          var q = entry.question;
+          return {
+            prompt: q.prompt,
+            chosenText: entry.chosenIndex === -1 ? '(no answer — time ran out)' : q.choices[entry.chosenIndex],
+            correctText: q.choices[q.correctIndex],
+            correct: entry.correct,
+            explanation: q.explanation || ''
+          };
+        })
       });
       if (endWeek.history.length > 50) endWeek.history = endWeek.history.slice(-50);
       persist();
@@ -2185,6 +2857,21 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     }
   });
 
+  /* ---------- Theme switcher ---------- */
+  var THEME_KEY = 'classArcadeTheme';
+  var currentTheme = localStorage.getItem(THEME_KEY) || 'pac';
+
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    document.getElementById('theme-select').value = currentTheme;
+  }
+  document.getElementById('theme-select').addEventListener('change', function (ev) {
+    currentTheme = ev.target.value;
+    localStorage.setItem(THEME_KEY, currentTheme);
+    applyTheme();
+  });
+  applyTheme();
+
   /* ---------- Mute toggle ---------- */
   function applyMuteButton() {
     var btn = document.getElementById('mute-toggle-btn');
@@ -2196,6 +2883,22 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     applyMuteButton();
   });
   applyMuteButton();
+
+  /* ---------- Best-score visibility toggle ---------- */
+  var SHOW_BEST_SCORE_KEY = 'classArcadeShowBestScore';
+  var showBestScore = localStorage.getItem(SHOW_BEST_SCORE_KEY) === 'true';
+
+  function applyBestScoreToggleButton() {
+    var btn = document.getElementById('best-score-toggle-btn');
+    btn.textContent = showBestScore ? 'BEST SCORE: ON' : 'BEST SCORE: OFF';
+  }
+  document.getElementById('best-score-toggle-btn').addEventListener('click', function () {
+    showBestScore = !showBestScore;
+    localStorage.setItem(SHOW_BEST_SCORE_KEY, showBestScore);
+    applyBestScoreToggleButton();
+    renderTopScoreIndicator();
+  });
+  applyBestScoreToggleButton();
 
   /* ---------- UI scale control ---------- */
   var UI_SCALE_KEY = 'classArcadeUiScale';
