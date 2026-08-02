@@ -68,6 +68,25 @@ body {
     radial-gradient(circle at 90% 90%, rgba(255,92,179,0.06) 0, transparent 40%);
 }
 
+/* CRT monitor overlay: scanlines + edge vignette, sits above all content but never blocks input */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.14) 0px,
+      rgba(0,0,0,0.14) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.45) 100%);
+  mix-blend-mode: multiply;
+}
+
 .pixel {
   font-family: 'PixelArcade', 'Courier New', monospace;
 }
