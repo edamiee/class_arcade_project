@@ -27,12 +27,14 @@
     ],
     "mac": {
       "target": ["dmg"],
-      "category": "public.app-category.education"
+      "category": "public.app-category.education",
+      "icon": "build/icon.icns"
     },
     "win": {
       "target": [
         { "target": "nsis", "arch": ["x64"] }
-      ]
+      ],
+      "icon": "build/icon.png"
     },
     "nsis": {
       "oneClick": false,
