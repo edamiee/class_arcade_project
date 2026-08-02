@@ -3252,6 +3252,15 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
   });
   applyUiScale();
 
+  /* ---------- Electron menu bridge (no-op outside the desktop build) ---------- */
+  if (window.electronAPI && window.electronAPI.onMenuAction) {
+    window.electronAPI.onMenuAction(function (action) {
+      if (action === 'export-bank') document.getElementById('export-btn').click();
+      else if (action === 'export-course') document.getElementById('export-course-btn').click();
+      else if (action === 'import') document.getElementById('import-input').click();
+    });
+  }
+
   /* ---------- Init ---------- */
   renderAdmin();
   renderPlaySetup();
