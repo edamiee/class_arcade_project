@@ -1754,7 +1754,9 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
   function getWeek(course, id) { return course && course.weeks.find(function (w) { return w.id === id; }); }
   function getQuestion(week, id) { return week && week.questions.find(function (q) { return q.id === id; }); }
 
-  var selectedCourseId = state.courses[0] ? state.courses[0].id : null;
+  var selectedCourseId = (state.defaultCourseId && state.courses.some(function (c) { return c.id === state.defaultCourseId; }))
+    ? state.defaultCourseId
+    : (state.courses[0] ? state.courses[0].id : null);
   var selectedWeekId = null;
   var selectedHistoryId = null;
   (function initWeek() {
@@ -1783,8 +1785,12 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     state.courses.forEach(function (c) {
       var li = document.createElement('li');
       if (c.id === selectedCourseId) li.classList.add('selected');
-      li.innerHTML = '<span>' + escapeHtml(c.name) + '</span><span class="meta">' + c.weeks.length + ' week(s)</span>' +
+      var isDefault = state.defaultCourseId === c.id;
+      li.innerHTML = '<span>' + (isDefault ? '&#9733; ' : '') + escapeHtml(c.name) + '</span><span class="meta">' + c.weeks.length + ' week(s)</span>' +
         '<span class="actions">' +
+        (isDefault
+          ? '<span class="meta" style="color:var(--yellow);">DEFAULT</span>'
+          : '<button data-act="set-default-course" data-id="' + c.id + '" class="secondary">SET DEFAULT</button>') +
         '<button data-act="edit-course" data-id="' + c.id + '">EDIT</button>' +
         '<button data-act="dup-course" data-id="' + c.id + '" class="secondary">DUP</button>' +
         '<button data-act="del-course" data-id="' + c.id + '" class="danger">DEL</button>' +
@@ -1796,6 +1802,14 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
         renderAdmin();
       });
       ul.appendChild(li);
+    });
+    ul.querySelectorAll('[data-act="set-default-course"]').forEach(function (btn) {
+      btn.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        state.defaultCourseId = btn.dataset.id;
+        persist();
+        renderAdmin();
+      });
     });
     ul.querySelectorAll('[data-act="edit-course"]').forEach(function (btn) {
       btn.addEventListener('click', function (ev) {
@@ -1826,6 +1840,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
         ev.stopPropagation();
         if (!confirm('Delete this course and all its questions?')) return;
         state.courses = state.courses.filter(function (c) { return c.id !== btn.dataset.id; });
+        if (state.defaultCourseId === btn.dataset.id) state.defaultCourseId = null;
         if (selectedCourseId === btn.dataset.id) {
           selectedCourseId = state.courses[0] ? state.courses[0].id : null;
           selectedWeekId = null;
@@ -2707,7 +2722,9 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
       playCourseSelect.appendChild(opt);
     });
     if (!state.courses.find(function (c) { return c.id === selectedCourseId; })) {
-      selectedCourseId = state.courses[0] ? state.courses[0].id : null;
+      selectedCourseId = (state.defaultCourseId && state.courses.some(function (c) { return c.id === state.defaultCourseId; }))
+        ? state.defaultCourseId
+        : (state.courses[0] ? state.courses[0].id : null);
     }
     playCourseSelect.value = selectedCourseId || '';
     renderPlayWeekOptions();
@@ -2772,6 +2789,9 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
       opt.value = w.id; opt.textContent = w.label;
       playWeekSelect.appendChild(opt);
     });
+    if (state.lastPlayWeekId && course.weeks.some(function (w) { return w.id === state.lastPlayWeekId; })) {
+      playWeekSelect.value = state.lastPlayWeekId;
+    }
     updatePlayCountMax();
   }
 
@@ -2795,7 +2815,11 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
   }
 
   playCourseSelect.addEventListener('change', renderPlayWeekOptions);
-  playWeekSelect.addEventListener('change', updatePlayCountMax);
+  playWeekSelect.addEventListener('change', function () {
+    state.lastPlayWeekId = playWeekSelect.value || null;
+    persist();
+    updatePlayCountMax();
+  });
   document.getElementById('play-mix-weeks').addEventListener('change', updatePlayCountMax);
 
   var gameState = null;
@@ -2943,6 +2967,8 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     var practiceMode = document.getElementById('play-practice-mode').checked;
     var teamMode = document.getElementById('play-team-mode').checked;
     var teamCount = parseInt(document.getElementById('team-count-select').value, 10) || 2;
+    state.lastPlayWeekId = week.id;
+    persist();
     launchGame(course, week, pool, count, timerSeconds, mixWeeks, practiceMode, teamMode, teamCount);
   });
 
