@@ -2318,47 +2318,51 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     });
   }
 
+  function processImportedJson(text) {
+    var statusEl = document.getElementById('data-status');
+    try {
+      var parsed = JSON.parse(text);
+      if (!parsed || !Array.isArray(parsed.courses)) throw new Error('File does not look like a valid bank export.');
+      var scope = document.getElementById('import-scope').value;
+      var mode = document.getElementById('import-mode').value;
+
+      if (scope === 'all') {
+        if (mode === 'overwrite') {
+          state = parsed;
+        } else {
+          mergeCoursesIntoState(parsed.courses);
+        }
+        selectedCourseId = state.courses[0] ? state.courses[0].id : null;
+        selectedWeekId = selectedCourseId ? (getCourse(selectedCourseId).weeks[0] ? getCourse(selectedCourseId).weeks[0].id : null) : null;
+      } else {
+        if (!selectedCourseId) throw new Error('Select a course first to import into just that course.');
+        var importedCourse = parsed.courses.find(function (c) { return c.id === selectedCourseId; });
+        if (!importedCourse) throw new Error('No course matching the currently selected course was found in that file.');
+        var targetCourse = getCourse(selectedCourseId);
+        if (mode === 'overwrite') {
+          targetCourse.weeks = importedCourse.weeks;
+        } else {
+          mergeWeeksInto(targetCourse, importedCourse);
+        }
+        selectedWeekId = targetCourse.weeks[0] ? targetCourse.weeks[0].id : null;
+      }
+
+      persist();
+      renderAdmin();
+      statusEl.textContent = 'Imported successfully.';
+      statusEl.className = 'status-msg ok';
+    } catch (e) {
+      statusEl.textContent = 'Import failed: ' + e.message;
+      statusEl.className = 'status-msg error';
+    }
+  }
+
   document.getElementById('import-input').addEventListener('change', function (ev) {
     var file = ev.target.files[0];
-    var statusEl = document.getElementById('data-status');
     if (!file) return;
-    var scope = document.getElementById('import-scope').value;
-    var mode = document.getElementById('import-mode').value;
     var reader = new FileReader();
     reader.onload = function () {
-      try {
-        var parsed = JSON.parse(reader.result);
-        if (!parsed || !Array.isArray(parsed.courses)) throw new Error('File does not look like a valid bank export.');
-
-        if (scope === 'all') {
-          if (mode === 'overwrite') {
-            state = parsed;
-          } else {
-            mergeCoursesIntoState(parsed.courses);
-          }
-          selectedCourseId = state.courses[0] ? state.courses[0].id : null;
-          selectedWeekId = selectedCourseId ? (getCourse(selectedCourseId).weeks[0] ? getCourse(selectedCourseId).weeks[0].id : null) : null;
-        } else {
-          if (!selectedCourseId) throw new Error('Select a course first to import into just that course.');
-          var importedCourse = parsed.courses.find(function (c) { return c.id === selectedCourseId; });
-          if (!importedCourse) throw new Error('No course matching the currently selected course was found in that file.');
-          var targetCourse = getCourse(selectedCourseId);
-          if (mode === 'overwrite') {
-            targetCourse.weeks = importedCourse.weeks;
-          } else {
-            mergeWeeksInto(targetCourse, importedCourse);
-          }
-          selectedWeekId = targetCourse.weeks[0] ? targetCourse.weeks[0].id : null;
-        }
-
-        persist();
-        renderAdmin();
-        statusEl.textContent = 'Imported successfully.';
-        statusEl.className = 'status-msg ok';
-      } catch (e) {
-        statusEl.textContent = 'Import failed: ' + e.message;
-        statusEl.className = 'status-msg error';
-      }
+      processImportedJson(reader.result);
       ev.target.value = '';
     };
     reader.readAsText(file);
@@ -3257,7 +3261,15 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     window.electronAPI.onMenuAction(function (action) {
       if (action === 'export-bank') document.getElementById('export-btn').click();
       else if (action === 'export-course') document.getElementById('export-course-btn').click();
-      else if (action === 'import') document.getElementById('import-input').click();
+      else if (action === 'import') {
+        if (window.electronAPI.openFile) {
+          window.electronAPI.openFile().then(function (result) {
+            if (result && !result.canceled && result.content) processImportedJson(result.content);
+          });
+        } else {
+          document.getElementById('import-input').click();
+        }
+      }
     });
   }
 
