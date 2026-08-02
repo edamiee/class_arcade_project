@@ -43,6 +43,29 @@ Both features are entirely optional — the app works fully offline without an A
 
 All courses, questions, scores, and history live in your browser's local storage — nothing is uploaded anywhere. Use the **Export** buttons in Admin to save the entire bank (or just one course) as a `.json` file for backup, and **Import** to restore or merge it back in — handy for moving between computers or keeping a copy on a USB drive.
 
-## Running it
+## Running it in a browser
 
 Just open `index.html` in a browser. No build step, no dependencies, no server. Works from a USB drive or any locked-down school computer with a modern browser installed.
+
+## Desktop app (Electron)
+
+This branch adds a thin Electron shell around the exact same `index.html` — there's no separate desktop codebase to maintain. `main.js` just opens a native window and loads `index.html` unchanged, so any feature added to the app works identically in the browser version and the desktop version with no extra porting.
+
+Data, sounds, themes, AI generation, and Export/Import all behave the same as the browser version; the desktop build just adds a native window with no browser chrome.
+
+### Run it in dev mode
+
+```bash
+npm install
+npm start
+```
+
+### Build installers
+
+```bash
+npm run dist:mac   # macOS .dmg (Apple Silicon)
+npm run dist:win   # Windows .exe installer (x64)
+npm run dist       # both
+```
+
+Installers land in `dist/` (gitignored — not checked into the repo). They're currently unsigned, so first launch will show a standard "unidentified developer" (macOS) or "Windows protected your PC" (Windows) warning — click through it once to run.
