@@ -349,13 +349,46 @@ ul.list li .actions button { font-size: 9px; padding: 4px 6px; }
 
 .arcade-lives { display: flex; align-items: center; gap: 6px; }
 .life-icon {
+  position: relative;
   display: block;
   width: 20px; height: 20px;
   border: 2px solid var(--panel-edge);
   box-shadow: 0 0 6px rgba(255,212,0,0.6);
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
+  background: #06061a;
+  flex: 0 0 auto;
+}
+.life-icon .lf-ear {
+  position: absolute;
+  top: 2px;
+  width: 0; height: 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-bottom: 6px solid #b9b9b9;
+}
+.life-icon .lf-ear.l { left: 2px; transform: rotate(-18deg); }
+.life-icon .lf-ear.r { right: 2px; transform: rotate(18deg); }
+.life-icon .lf-head {
+  position: absolute;
+  left: 3px; top: 6px;
+  width: 14px; height: 11px;
+  border-radius: 5px 5px 6px 6px;
+  background: #b9b9b9;
+}
+.life-icon .lf-eye {
+  position: absolute;
+  top: 10px;
+  width: 2px; height: 2px;
+  border-radius: 50%;
+  background: #1a1a1a;
+}
+.life-icon .lf-eye.l { left: 6px; }
+.life-icon .lf-eye.r { right: 6px; }
+.life-icon .lf-nose {
+  position: absolute;
+  left: 8px; top: 13px;
+  width: 3px; height: 2px;
+  border-radius: 50%;
+  background: #1a1a1a;
 }
 .life-icon.lost { filter: grayscale(1) brightness(0.5); opacity: 0.4; box-shadow: none; }
 
@@ -2830,17 +2863,21 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     launchGame(course, week, pool, count, gameState.timerSeconds, gameState.mixWeeks, gameState.practiceMode);
   });
 
-  var LIFE_ICON_SRC = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUBAMAAAB/pwA+AAAAJFBMVEXq5trY1MXOxrHMs5a6r5m0noOqj3KYhW+LcVVyVj1cQiwvIRR9S3/AAAAAuUlEQVR4nBXLsVEDMRBG4X/XImPOKzlm5uRxAeAa3As9EVAALTDQgXHgmDsUOkC7Ir8Vc9kLvkcv+XY9Py9vn8YR8XwntG9g04Bjl7QFd8wuhPKI0IZqqq4CXi66+Z4tG8LUq09j9R+wtgQvokBAt6NVbWtOu0z9IwHBTzzaw1drMfBJke5fHeCdbQF62gNhnAeT92QA4/cvV1AnsJvE5aJFIpccybyvIJIgdROASQwVBesG881hAPAPwQxWCglpsEgAAAAASUVORK5CYII=';
+  var LIFE_ICON_HTML =
+    '<span class="lf-ear l"></span><span class="lf-ear r"></span>' +
+    '<span class="lf-head"></span>' +
+    '<span class="lf-eye l"></span><span class="lf-eye r"></span>' +
+    '<span class="lf-nose"></span>';
 
   function renderLives() {
     var row = document.getElementById('lives-row');
     row.innerHTML = '';
     for (var i = 0; i < LIVES; i++) {
-      var img = document.createElement('img');
-      img.src = LIFE_ICON_SRC;
-      img.alt = 'life';
-      img.className = 'life-icon' + (i >= gameState.lives ? ' lost' : '');
-      row.appendChild(img);
+      var icon = document.createElement('span');
+      icon.className = 'life-icon' + (i >= gameState.lives ? ' lost' : '');
+      icon.title = 'life';
+      icon.innerHTML = LIFE_ICON_HTML;
+      row.appendChild(icon);
     }
   }
 
