@@ -22,17 +22,31 @@
     },
     "files": [
       "main.js",
+      "preload.js",
       "index.html",
-      "package.json"
+      "package.json",
+      "build/icon.png"
     ],
+    "publish": {
+      "provider": "github",
+      "owner": "edamiee",
+      "repo": "class_arcade_project"
+    },
     "mac": {
-      "target": ["dmg"],
+      "target": [
+        "dmg"
+      ],
       "category": "public.app-category.education",
       "icon": "build/icon.icns"
     },
     "win": {
       "target": [
-        { "target": "nsis", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "build/icon.png"
     },
@@ -40,5 +54,8 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
   }
 }
