@@ -104,6 +104,20 @@ ipcMain.handle('save-file', async (event, content, defaultFilename) => {
   return { canceled: false, filePath };
 });
 
+ipcMain.handle('open-file', async (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+    properties: ['openFile'],
+    filters: [
+      { name: 'JSON', extensions: ['json'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  });
+  if (canceled || !filePaths || !filePaths[0]) return { canceled: true };
+  const content = fs.readFileSync(filePaths[0], 'utf-8');
+  return { canceled: false, filePath: filePaths[0], content: content };
+});
+
 app.whenReady().then(() => {
   Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
   if (isMac) {
