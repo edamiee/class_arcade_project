@@ -347,6 +347,36 @@ ul.list li .actions button { font-size: 9px; padding: 4px 6px; }
 
 .score-lives { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 
+.team-scoreboard { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.team-badge {
+  font-family: 'PixelArcade', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  border: 3px solid var(--panel-edge);
+  padding: 8px 12px;
+  background: var(--panel);
+  text-align: center;
+}
+.team-badge .team-badge-score { color: var(--yellow); font-size: 16px; display: block; margin-top: 4px; }
+.team-badge.current {
+  color: var(--text);
+  border-color: var(--yellow);
+  box-shadow: 0 0 10px rgba(255,212,0,0.6);
+  animation: cell-current-pulse 0.8s ease-in-out infinite;
+}
+
+#team-leaderboard { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 14px 0; }
+#team-leaderboard .team-badge { font-size: 13px; padding: 12px 18px; }
+#team-leaderboard .team-badge .team-badge-score { font-size: 22px; }
+#team-leaderboard .team-badge.winner {
+  color: #1a1400;
+  background: linear-gradient(90deg, var(--yellow), var(--pink), var(--cyan), var(--yellow));
+  background-size: 300% 100%;
+  animation: super-badge-shift 1.2s linear infinite;
+  border-color: #fff;
+}
+#team-leaderboard .team-badge.winner .team-badge-score { color: #1a1400; }
+
 .arcade-lives { display: flex; align-items: center; gap: 6px; }
 .life-icon {
   position: relative;
@@ -1057,6 +1087,19 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
         </label>
       </div>
       <div class="row" style="margin-top:8px; align-items:center;">
+        <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); cursor:pointer;">
+          <input type="checkbox" id="play-team-mode"> Team mode (class competition, teams take turns, no lives)
+        </label>
+      </div>
+      <div class="row hidden" id="team-count-row" style="margin-top:8px; align-items:center; gap:10px;">
+        <label for="team-count-select" style="font-size:12px;color:var(--muted);">Number of teams</label>
+        <select id="team-count-select" style="width:auto;">
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+        </select>
+      </div>
+      <div class="row" style="margin-top:8px; align-items:center;">
         <button id="best-score-toggle-btn" class="ghost" type="button">BEST SCORE: OFF</button>
         <div id="top-score-indicator" style="font-size:12px;color:var(--muted);"></div>
       </div>
@@ -1089,11 +1132,12 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
 
     <div id="game-screen">
       <div class="game-header">
-        <div class="score-lives">
+        <div class="score-lives" id="score-lives">
           <div class="arcade-score">SCORE <span id="score-val">0</span></div>
           <div class="arcade-lives" id="lives-row"></div>
           <div class="super-badge hidden" id="super-badge">SUPER! x2</div>
         </div>
+        <div class="team-scoreboard hidden" id="team-scoreboard"></div>
         <div class="pellets-wrap" id="pellets-wrap">
           <div class="theme-decor theme-decor-pac">
             <div class="pellets" id="pellets-row"></div>
@@ -1191,8 +1235,9 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
 
       <div class="final-score" id="final-score"></div>
       <div class="final-score-sub" id="final-score-sub"></div>
+      <div id="team-leaderboard" class="hidden"></div>
 
-      <div class="panel" style="text-align:left; max-width:500px; margin-left:auto; margin-right:auto;">
+      <div class="panel" id="save-score-panel" style="text-align:left; max-width:500px; margin-left:auto; margin-right:auto;">
         <h3 style="font-size:12px;color:var(--cyan);margin:0 0 10px;">SAVE THIS SCORE (optional)</h3>
         <div class="row">
           <div class="col">
@@ -1269,8 +1314,10 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
       <p style="font-size:11px;color:var(--muted);margin-top:0;">How often each question has been missed across every saved game for this week — highest miss rate first.</p>
       <div id="miss-rate-list"></div>
       <div class="row" style="margin-top:10px;">
+        <button id="play-review-round-btn">PLAY REVIEW ROUND</button>
         <button id="clear-miss-rate-btn" class="danger">CLEAR ALL MISS-RATE DATA</button>
       </div>
+      <div id="review-round-status" class="status-msg"></div>
     </div>
 
     <div class="panel" id="questions-panel">
@@ -2537,6 +2584,27 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     renderMissRateView(week);
   });
 
+  document.getElementById('play-review-round-btn').addEventListener('click', function () {
+    var statusEl = document.getElementById('review-round-status');
+    var course = getCourse(selectedCourseId);
+    var week = getWeek(course, selectedWeekId);
+    if (!week) { statusEl.textContent = 'Select a course and week first.'; statusEl.className = 'status-msg error'; return; }
+    var missed = computeMissRates(week).filter(function (r) { return r.misses > 0; });
+    var pool = [];
+    missed.forEach(function (r) {
+      var q = week.questions.find(function (qq) { return qq.prompt === r.prompt; });
+      if (q) pool.push(q);
+    });
+    if (pool.length === 0) {
+      statusEl.textContent = 'No missed questions to review yet for this week.';
+      statusEl.className = 'status-msg error';
+      return;
+    }
+    statusEl.textContent = '';
+    document.querySelector('[data-tab="play"]').click();
+    launchGame(course, week, pool, pool.length, 0, false, true, false, 0);
+  });
+
   document.getElementById('clear-week-history-btn').addEventListener('click', function () {
     var course = getCourse(selectedCourseId);
     var week = getWeek(course, selectedWeekId);
@@ -2789,8 +2857,8 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     setTimeout(function () { container.innerHTML = ''; }, 1300);
   }
 
-  function spawnScorePopup(text) {
-    var anchor = document.querySelector('.arcade-score');
+  function spawnScorePopup(text, anchorEl) {
+    var anchor = anchorEl || document.querySelector('.arcade-score');
     if (!anchor) return;
     var el = document.createElement('span');
     el.className = 'score-popup';
@@ -2799,7 +2867,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     setTimeout(function () { el.remove(); }, 900);
   }
 
-  function launchGame(course, week, questionPool, count, timerSeconds, mixWeeks, practiceMode) {
+  function launchGame(course, week, questionPool, count, timerSeconds, mixWeeks, practiceMode, teamMode, teamCount) {
     var pool = questionPool.slice();
     if (week.randomOrder !== false) {
       for (var i = pool.length - 1; i > 0; i--) {
@@ -2820,6 +2888,10 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
       weekId: week.id,
       mixWeeks: !!mixWeeks,
       practiceMode: !!practiceMode,
+      teamMode: !!teamMode,
+      teamCount: teamMode ? teamCount : 0,
+      teamScores: teamMode ? new Array(teamCount).fill(0) : null,
+      currentTeamIndex: 0,
       answered: false,
       log: []
     };
@@ -2829,8 +2901,27 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     document.getElementById('game-screen').classList.add('active');
     document.getElementById('end-screen').classList.remove('active');
     playScreenEnter(document.getElementById('game-screen'));
+    document.getElementById('score-lives').classList.toggle('hidden', gameState.teamMode);
+    document.getElementById('team-scoreboard').classList.toggle('hidden', !gameState.teamMode);
+    renderTeamScoreboard();
     updateSuperMode();
     renderQuestionScreen();
+  }
+
+  document.getElementById('play-team-mode').addEventListener('change', function (ev) {
+    document.getElementById('team-count-row').classList.toggle('hidden', !ev.target.checked);
+  });
+
+  function renderTeamScoreboard() {
+    var el = document.getElementById('team-scoreboard');
+    if (!gameState.teamMode) { el.innerHTML = ''; return; }
+    var html = '';
+    for (var i = 0; i < gameState.teamCount; i++) {
+      html += '<div class="team-badge' + (i === gameState.currentTeamIndex ? ' current' : '') + '">' +
+        'TEAM ' + (i + 1) + (i === gameState.currentTeamIndex ? ' (UP)' : '') +
+        '<span class="team-badge-score">' + gameState.teamScores[i] + '</span></div>';
+    }
+    el.innerHTML = html;
   }
 
   document.getElementById('start-game-btn').addEventListener('click', function () {
@@ -2850,7 +2941,9 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     var count = Math.min(requested, pool.length);
     var timerSeconds = parseInt(document.getElementById('play-timer-seconds').value, 10) || 0;
     var practiceMode = document.getElementById('play-practice-mode').checked;
-    launchGame(course, week, pool, count, timerSeconds, mixWeeks, practiceMode);
+    var teamMode = document.getElementById('play-team-mode').checked;
+    var teamCount = parseInt(document.getElementById('team-count-select').value, 10) || 2;
+    launchGame(course, week, pool, count, timerSeconds, mixWeeks, practiceMode, teamMode, teamCount);
   });
 
   document.getElementById('restart-game-btn').addEventListener('click', function () {
@@ -2860,7 +2953,7 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     var pool = gameState.mixWeeks ? getAllCourseQuestions(course) : week.questions;
     if (pool.length === 0) return;
     var count = Math.min(gameState.questions.length, pool.length);
-    launchGame(course, week, pool, count, gameState.timerSeconds, gameState.mixWeeks, gameState.practiceMode);
+    launchGame(course, week, pool, count, gameState.timerSeconds, gameState.mixWeeks, gameState.practiceMode, gameState.teamMode, gameState.teamCount);
   });
 
   var LIFE_ICON_HTML =
@@ -3072,15 +3165,26 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     document.getElementById('hint-btn').classList.add('hidden');
     var wasSuper = gameState.streak >= 3;
     if (correct) {
-      gameState.score += wasSuper ? 2 : 1;
-      gameState.streak++;
-      playCorrectSound();
-      spawnScorePopup(wasSuper ? '+2 SUPER' : '+1');
+      if (gameState.teamMode) {
+        gameState.teamScores[gameState.currentTeamIndex] += 1;
+        playCorrectSound();
+        renderTeamScoreboard();
+        spawnScorePopup('+1', document.querySelectorAll('.team-badge')[gameState.currentTeamIndex]);
+      } else {
+        gameState.score += wasSuper ? 2 : 1;
+        gameState.streak++;
+        playCorrectSound();
+        spawnScorePopup(wasSuper ? '+2 SUPER' : '+1');
+      }
     } else {
-      gameState.lives--;
-      gameState.streak = 0;
       playLifeLostSound();
-      if (gameState.lives <= 0) gameState.gameOver = true;
+      if (gameState.teamMode) {
+        renderTeamScoreboard();
+      } else {
+        gameState.lives--;
+        gameState.streak = 0;
+        if (gameState.lives <= 0) gameState.gameOver = true;
+      }
     }
 
     var buttons = document.querySelectorAll('#choices-row .choice-btn');
@@ -3119,6 +3223,10 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     if (gameState.index >= gameState.questions.length) {
       showEndScreen();
     } else {
+      if (gameState.teamMode) {
+        gameState.currentTeamIndex = (gameState.currentTeamIndex + 1) % gameState.teamCount;
+        renderTeamScoreboard();
+      }
       renderQuestionScreen();
     }
   });
@@ -3159,46 +3267,75 @@ footer.note { color: var(--muted); font-size: 11px; margin-top: 30px; text-align
     document.getElementById('game-screen').classList.remove('active');
     document.getElementById('end-screen').classList.add('active');
     playScreenEnter(document.getElementById('end-screen'));
-    var outOfLives = gameState.lives <= 0;
     var correctCount = gameState.log.filter(function (e) { return e.correct; }).length;
-    var bonus = gameState.score - correctCount;
 
-    document.getElementById('final-score').textContent =
-      gameState.score + ' PTS' + (outOfLives ? ' (out of lives)' : '');
+    var saveScorePanel = document.getElementById('save-score-panel');
+    var leaderboardEl = document.getElementById('team-leaderboard');
 
-    var subEl = document.getElementById('final-score-sub');
-    subEl.innerHTML = correctCount + ' / ' + gameState.questions.length + ' correct' +
-      (bonus > 0 ? ' <span class="bonus">+' + bonus + ' Super Bonus</span>' : '');
+    if (gameState.teamMode) {
+      document.getElementById('final-score').textContent = '';
+      document.getElementById('final-score-sub').textContent = '';
+      saveScorePanel.classList.add('hidden');
+      document.getElementById('perfect-round-banner').classList.add('hidden');
+      document.getElementById('game-over-decor').classList.add('hidden');
 
-    var isPerfect = gameState.questions.length > 0 && correctCount === gameState.questions.length;
-    document.getElementById('perfect-round-banner').classList.toggle('hidden', !isPerfect);
-    document.getElementById('game-over-decor').classList.toggle('hidden', isPerfect);
-    if (isPerfect) playPerfectRoundSound(); else playGameOverSound();
-    if (isPerfect) setTimeout(spawnPerfectParticles, 350);
-
-    document.getElementById('score-label-input').value = '';
-    document.getElementById('save-score-status').textContent = '';
-    var endWeek = getWeek(getCourse(gameState.courseId), gameState.weekId);
-    if (endWeek) renderSavedScoresList(endWeek);
-
-    if (endWeek) {
-      if (!Array.isArray(endWeek.history)) endWeek.history = [];
-      endWeek.history.push({
-        id: uid(), date: new Date().toISOString(), score: gameState.score,
-        total: gameState.questions.length, correctCount: correctCount, outOfLives: outOfLives,
-        details: gameState.log.map(function (entry) {
-          var q = entry.question;
-          return {
-            prompt: q.prompt,
-            chosenText: entry.chosenIndex === -1 ? '(no answer — time ran out)' : q.choices[entry.chosenIndex],
-            correctText: q.choices[q.correctIndex],
-            correct: entry.correct,
-            explanation: q.explanation || ''
-          };
-        })
+      var maxScore = Math.max.apply(null, gameState.teamScores);
+      var ranked = gameState.teamScores.map(function (s, i) { return { team: i + 1, score: s }; })
+        .sort(function (a, b) { return b.score - a.score; });
+      var html = '';
+      ranked.forEach(function (r) {
+        var isWinner = r.score === maxScore && maxScore > 0;
+        html += '<div class="team-badge' + (isWinner ? ' winner' : '') + '">' +
+          'TEAM ' + r.team + (isWinner ? ' ★' : '') +
+          '<span class="team-badge-score">' + r.score + '</span></div>';
       });
-      if (endWeek.history.length > 50) endWeek.history = endWeek.history.slice(-50);
-      persist();
+      leaderboardEl.innerHTML = html;
+      leaderboardEl.classList.remove('hidden');
+      playGameOverSound();
+    } else {
+      var outOfLives = gameState.lives <= 0;
+      var bonus = gameState.score - correctCount;
+
+      document.getElementById('final-score').textContent =
+        gameState.score + ' PTS' + (outOfLives ? ' (out of lives)' : '');
+
+      var subEl = document.getElementById('final-score-sub');
+      subEl.innerHTML = correctCount + ' / ' + gameState.questions.length + ' correct' +
+        (bonus > 0 ? ' <span class="bonus">+' + bonus + ' Super Bonus</span>' : '');
+
+      leaderboardEl.classList.add('hidden');
+      saveScorePanel.classList.remove('hidden');
+
+      var isPerfect = gameState.questions.length > 0 && correctCount === gameState.questions.length;
+      document.getElementById('perfect-round-banner').classList.toggle('hidden', !isPerfect);
+      document.getElementById('game-over-decor').classList.toggle('hidden', isPerfect);
+      if (isPerfect) playPerfectRoundSound(); else playGameOverSound();
+      if (isPerfect) setTimeout(spawnPerfectParticles, 350);
+
+      document.getElementById('score-label-input').value = '';
+      document.getElementById('save-score-status').textContent = '';
+      var endWeek = getWeek(getCourse(gameState.courseId), gameState.weekId);
+      if (endWeek) renderSavedScoresList(endWeek);
+
+      if (endWeek) {
+        if (!Array.isArray(endWeek.history)) endWeek.history = [];
+        endWeek.history.push({
+          id: uid(), date: new Date().toISOString(), score: gameState.score,
+          total: gameState.questions.length, correctCount: correctCount, outOfLives: outOfLives,
+          details: gameState.log.map(function (entry) {
+            var q = entry.question;
+            return {
+              prompt: q.prompt,
+              chosenText: entry.chosenIndex === -1 ? '(no answer — time ran out)' : q.choices[entry.chosenIndex],
+              correctText: q.choices[q.correctIndex],
+              correct: entry.correct,
+              explanation: q.explanation || ''
+            };
+          })
+        });
+        if (endWeek.history.length > 50) endWeek.history = endWeek.history.slice(-50);
+        persist();
+      }
     }
 
     var list = document.getElementById('review-list');
