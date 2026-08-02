@@ -3,3 +3,6 @@
 dog.jpg
 dog2.jpg
 class-arcade-bank*.json
+node_modules/
+dist/
+out/
