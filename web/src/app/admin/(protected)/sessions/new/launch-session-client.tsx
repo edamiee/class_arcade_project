@@ -176,7 +176,7 @@ export default function LaunchSessionClient({
         <div className="flex gap-2">
           <Link
             href={`/admin/sessions/${created.id}`}
-            className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-500"
+            className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500"
           >
             View results
           </Link>
@@ -236,7 +236,7 @@ export default function LaunchSessionClient({
               onClick={() => setTheme(t.value)}
               className={`rounded-md px-3 py-1.5 text-sm ${
                 theme === t.value
-                  ? "bg-indigo-600 text-white"
+                  ? "bg-indigo-600 text-[var(--bg)]"
                   : "border border-slate-700 text-slate-300"
               }`}
             >
@@ -254,7 +254,7 @@ export default function LaunchSessionClient({
             onClick={() => setMode("individual")}
             className={`rounded-md px-3 py-1.5 text-sm ${
               mode === "individual"
-                ? "bg-indigo-600 text-white"
+                ? "bg-indigo-600 text-[var(--bg)]"
                 : "border border-slate-700 text-slate-300"
             }`}
           >
@@ -265,7 +265,7 @@ export default function LaunchSessionClient({
             onClick={() => setMode("team")}
             className={`rounded-md px-3 py-1.5 text-sm ${
               mode === "team"
-                ? "bg-indigo-600 text-white"
+                ? "bg-indigo-600 text-[var(--bg)]"
                 : "border border-slate-700 text-slate-300"
             }`}
           >
@@ -322,7 +322,7 @@ export default function LaunchSessionClient({
       <button
         type="submit"
         disabled={busy || !courseId || !weekId}
-        className="w-full rounded-md bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-50"
+        className="w-full rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500 disabled:opacity-50"
       >
         {busy ? "Launching…" : "Launch session"}
       </button>

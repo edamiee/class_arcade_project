@@ -97,7 +97,7 @@ export default function JoinPage() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full rounded-md bg-indigo-600 px-3 py-2 font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-50"
+              className="w-full rounded-md bg-indigo-600 px-3 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500 disabled:opacity-50"
             >
               {busy ? "Checking…" : "Continue"}
             </button>
@@ -149,7 +149,7 @@ export default function JoinPage() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full rounded-md bg-indigo-600 px-3 py-2 font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-50"
+              className="w-full rounded-md bg-indigo-600 px-3 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500 disabled:opacity-50"
             >
               {busy ? "Joining…" : "Join"}
             </button>

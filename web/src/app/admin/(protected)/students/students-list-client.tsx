@@ -154,7 +154,7 @@ export default function StudentsListClient({
               <button
                 onClick={() => confirmMerge(s)}
                 disabled={!mergeTargetId || busy}
-                className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
+                className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-[var(--bg)] disabled:opacity-50"
               >
                 Merge
               </button>

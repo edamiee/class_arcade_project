@@ -36,7 +36,7 @@ export default async function SessionsHistoryPage() {
         <h2 className="text-2xl font-bold">Sessions history</h2>
         <Link
           href="/admin/sessions/new"
-          className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-500"
+          className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500"
         >
           Launch a session
         </Link>

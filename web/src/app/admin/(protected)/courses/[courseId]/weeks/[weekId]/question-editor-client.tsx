@@ -231,7 +231,7 @@ export default function QuestionEditorClient({
           <button
             type="submit"
             disabled={aiBusy}
-            className="rounded-md bg-indigo-600 px-4 py-1.5 font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-50"
+            className="rounded-md bg-indigo-600 px-4 py-1.5 font-semibold text-[var(--bg)] transition hover:bg-indigo-500 disabled:opacity-50"
           >
             {aiBusy ? "Generating…" : "Generate"}
           </button>
@@ -301,7 +301,7 @@ export default function QuestionEditorClient({
             onClick={() => setType("mc")}
             className={`rounded-md px-3 py-1.5 text-sm ${
               form.type === "mc"
-                ? "bg-indigo-600 text-white"
+                ? "bg-indigo-600 text-[var(--bg)]"
                 : "border border-slate-700 text-slate-300"
             }`}
           >
@@ -312,7 +312,7 @@ export default function QuestionEditorClient({
             onClick={() => setType("tf")}
             className={`rounded-md px-3 py-1.5 text-sm ${
               form.type === "tf"
-                ? "bg-indigo-600 text-white"
+                ? "bg-indigo-600 text-[var(--bg)]"
                 : "border border-slate-700 text-slate-300"
             }`}
           >
@@ -383,7 +383,7 @@ export default function QuestionEditorClient({
           <button
             type="submit"
             disabled={busy}
-            className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-50"
+            className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500 disabled:opacity-50"
           >
             {editingId ? "Save changes" : "Add question"}
           </button>

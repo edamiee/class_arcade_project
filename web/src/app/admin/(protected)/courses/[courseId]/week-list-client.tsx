@@ -115,7 +115,7 @@ export default function WeekListClient({
         <button
           type="submit"
           disabled={busy}
-          className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-50"
+          className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500 disabled:opacity-50"
         >
           Add week
         </button>

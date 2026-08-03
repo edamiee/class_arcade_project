@@ -7,7 +7,7 @@ export default function AdminHomePage() {
       <div className="flex flex-wrap gap-3">
         <Link
           href="/admin/courses"
-          className="inline-block rounded-md bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-500"
+          className="inline-block rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500"
         >
           Manage courses
         </Link>

@@ -1,26 +1,141 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Same three palettes as the original single-file app's [data-theme] CSS
+   variables. Admin/join/results default to "pac" (set on <html>); /play
+   overrides data-theme locally to match the session's actual theme. */
+:root,
+[data-theme="pac"] {
+  --bg: #060613;
+  --panel: #10102a;
+  --panel-edge: #2a2a5c;
+  --panel-edge-hover: #4a4a8f;
+  --yellow: #ffd400;
+  --pink: #ff5cb3;
+  --cyan: #40e0ff;
+  --cyan-hover: #7de8ff;
+  --red: #ff3b3b;
+  --red-dim: #7a1f1f;
+  --green: #33ff8c;
+  --text: #eef0ff;
+  --muted: #8888b0;
 }
 
+[data-theme="blocks"] {
+  --bg: #07090c;
+  --panel: #10151c;
+  --panel-edge: #2f3a45;
+  --panel-edge-hover: #4d5f70;
+  --yellow: #ffe14d;
+  --pink: #ff8c1a;
+  --cyan: #4de3ff;
+  --cyan-hover: #8aedff;
+  --red: #ff4d4d;
+  --red-dim: #7a2020;
+  --green: #4dffa0;
+  --text: #eaf2ff;
+  --muted: #7f8ab0;
+}
+
+[data-theme="plumber"] {
+  --bg: #170a0a;
+  --panel: #2a1414;
+  --panel-edge: #5a2a2a;
+  --panel-edge-hover: #7a3a3a;
+  --yellow: #ffcc33;
+  --pink: #ff6b6b;
+  --cyan: #4a90d9;
+  --cyan-hover: #7ab0e9;
+  --red: #e63946;
+  --red-dim: #5a1a20;
+  --green: #4caf50;
+  --text: #fff3e0;
+  --muted: #b0968a;
+}
+
+/* Remap Tailwind's built-in palette tokens to the arcade theme above, so
+   every existing bg-slate-950 / text-indigo-400 / border-red-900 / etc.
+   utility class across the app repaints automatically — no per-component
+   edits needed. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-slate-950: var(--bg);
+  --color-slate-900: var(--panel);
+  --color-slate-800: var(--panel-edge);
+  --color-slate-700: var(--panel-edge);
+  --color-slate-500: var(--panel-edge-hover);
+  --color-slate-400: var(--muted);
+  --color-slate-300: var(--muted);
+  --color-slate-200: var(--text);
+  --color-slate-100: var(--text);
+
+  --color-indigo-600: var(--cyan);
+  --color-indigo-500: var(--cyan-hover);
+  --color-indigo-400: var(--cyan);
+  --color-indigo-300: var(--cyan-hover);
+  --color-indigo-950: var(--panel-edge);
+
+  --color-red-900: var(--red-dim);
+  --color-red-600: var(--red);
+  --color-red-400: var(--red);
+  --color-red-300: var(--red);
+
+  --color-emerald-950: var(--panel);
+  --color-emerald-400: var(--green);
+  --color-green-400: var(--green);
+
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+
+  --font-mono: "Courier New", Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Courier New", Consolas, monospace;
+  background-image:
+    radial-gradient(circle at 10% 10%, rgba(64, 224, 255, 0.06) 0, transparent 40%),
+    radial-gradient(circle at 90% 90%, rgba(255, 92, 179, 0.06) 0, transparent 40%);
+}
+
+/* CRT monitor overlay: scanlines + edge vignette, sits above everything
+   but never blocks input. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.14) 0px,
+      rgba(0, 0, 0, 0.14) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+  mix-blend-mode: multiply;
+}
+
+h1,
+h2,
+h3,
+button,
+input[type="submit"] {
+  font-family: var(--font-pixel), "Courier New", monospace;
+  letter-spacing: 0.5px;
+}
+
+h1 {
+  text-shadow: 0 0 6px rgba(255, 212, 0, 0.5), 0 0 14px rgba(255, 212, 0, 0.25);
+}
+
+button {
+  cursor: pointer;
 }
