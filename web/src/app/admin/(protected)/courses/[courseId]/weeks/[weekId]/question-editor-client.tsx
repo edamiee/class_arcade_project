@@ -25,6 +25,45 @@ export default function QuestionEditorClient({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiType, setAiType] = useState<"mc" | "tf" | "mix">("mix");
+  const [aiCount, setAiCount] = useState(5);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiStatus, setAiStatus] = useState<{
+    kind: "ok" | "error";
+    text: string;
+  } | null>(null);
+
+  async function generateWithAi(e: React.FormEvent) {
+    e.preventDefault();
+    const topic = aiTopic.trim();
+    if (!topic) {
+      setAiStatus({ kind: "error", text: "Describe the topic/material to cover." });
+      return;
+    }
+    setAiBusy(true);
+    setAiStatus({ kind: "ok", text: "Generating…" });
+    try {
+      const res = await fetch("/api/admin/generate-questions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ weekId, topic, type: aiType, count: aiCount }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Generation failed.");
+      setQuestions((prev) => [...prev, ...(data.questions as Question[])]);
+      setAiStatus({ kind: "ok", text: `Added ${data.added} question(s).` });
+      setAiTopic("");
+    } catch (err) {
+      setAiStatus({
+        kind: "error",
+        text: err instanceof Error ? err.message : "Generation failed.",
+      });
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
   function startNew() {
     setEditingId(null);
     setForm(EMPTY_FORM);
@@ -155,7 +194,60 @@ export default function QuestionEditorClient({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <div className="space-y-6">
+      <form
+        onSubmit={generateWithAi}
+        className="space-y-3 rounded-lg border border-slate-800 p-4"
+      >
+        <h3 className="font-semibold text-slate-100">Generate with AI</h3>
+        <textarea
+          value={aiTopic}
+          onChange={(e) => setAiTopic(e.target.value)}
+          placeholder="Topic/material to cover (e.g. paste in notes, describe the concept)"
+          rows={3}
+          className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+        />
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={aiType}
+            onChange={(e) => setAiType(e.target.value as "mc" | "tf" | "mix")}
+            className="rounded-md border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 outline-none focus:border-indigo-500"
+          >
+            <option value="mix">Mix MC + TF</option>
+            <option value="mc">Multiple choice only</option>
+            <option value="tf">True/False only</option>
+          </select>
+          <label className="flex items-center gap-2 text-sm text-slate-300">
+            Count
+            <input
+              type="number"
+              min={1}
+              max={20}
+              value={aiCount}
+              onChange={(e) => setAiCount(parseInt(e.target.value, 10) || 5)}
+              className="w-16 rounded-md border border-slate-700 bg-slate-950 px-2 py-1.5 text-slate-100 outline-none focus:border-indigo-500"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={aiBusy}
+            className="rounded-md bg-indigo-600 px-4 py-1.5 font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-50"
+          >
+            {aiBusy ? "Generating…" : "Generate"}
+          </button>
+        </div>
+        {aiStatus && (
+          <p
+            className={
+              aiStatus.kind === "error" ? "text-sm text-red-400" : "text-sm text-emerald-400"
+            }
+          >
+            {aiStatus.text}
+          </p>
+        )}
+      </form>
+
+      <div className="grid gap-6 lg:grid-cols-2">
       <div>
         <ul className="divide-y divide-slate-800 rounded-lg border border-slate-800">
           {questions.map((q) => (
@@ -306,6 +398,7 @@ export default function QuestionEditorClient({
           )}
         </div>
       </form>
+      </div>
     </div>
   );
 }
