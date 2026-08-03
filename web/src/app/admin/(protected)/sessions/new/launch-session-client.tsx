@@ -1,0 +1,322 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { generateSessionCode } from "@/lib/session-code";
+import type { Course, Week, Team, GameSession, SessionMode } from "@/lib/types";
+
+const THEMES: { value: string; label: string }[] = [
+  { value: "pac", label: "PAC" },
+  { value: "blocks", label: "BLOCKS" },
+  { value: "plumber", label: "PLUMBER" },
+];
+
+export default function LaunchSessionClient({
+  courses,
+  weeks,
+  initialTeams,
+}: {
+  courses: Course[];
+  weeks: Week[];
+  initialTeams: Team[];
+}) {
+  const [courseId, setCourseId] = useState(courses[0]?.id ?? "");
+  const weeksForCourse = useMemo(
+    () => weeks.filter((w) => w.course_id === courseId),
+    [weeks, courseId]
+  );
+  const [weekId, setWeekId] = useState(weeksForCourse[0]?.id ?? "");
+  const [theme, setTheme] = useState("pac");
+  const [mode, setMode] = useState<SessionMode>("individual");
+
+  const [teams, setTeams] = useState(initialTeams);
+  const [selectedTeamIds, setSelectedTeamIds] = useState<Set<string>>(
+    new Set()
+  );
+  const [newTeamName, setNewTeamName] = useState("");
+  const [teamBusy, setTeamBusy] = useState(false);
+
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [created, setCreated] = useState<GameSession | null>(null);
+
+  function onCourseChange(id: string) {
+    setCourseId(id);
+    const first = weeks.find((w) => w.course_id === id);
+    setWeekId(first?.id ?? "");
+  }
+
+  function toggleTeam(id: string) {
+    setSelectedTeamIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function addTeam() {
+    const name = newTeamName.trim();
+    if (!name) return;
+    setTeamBusy(true);
+    const supabase = createClient();
+    const { data, error: insertError } = await supabase
+      .from("teams")
+      .insert({ name })
+      .select()
+      .single();
+    setTeamBusy(false);
+    if (insertError) {
+      alert(insertError.message);
+      return;
+    }
+    const team = data as Team;
+    setTeams((prev) => [...prev, team]);
+    setSelectedTeamIds((prev) => new Set(prev).add(team.id));
+    setNewTeamName("");
+  }
+
+  async function launch(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    if (!courseId || !weekId) {
+      setError("Pick a course and week.");
+      return;
+    }
+    if (mode === "team" && selectedTeamIds.size === 0) {
+      setError("Pick at least one team, or switch to individual mode.");
+      return;
+    }
+
+    setBusy(true);
+    const supabase = createClient();
+
+    let session: GameSession | null = null;
+    let lastError: string | null = null;
+    for (let attempt = 0; attempt < 5 && !session; attempt++) {
+      const code = generateSessionCode();
+      const { data, error: insertError } = await supabase
+        .from("sessions")
+        .insert({
+          course_id: courseId,
+          week_id: weekId,
+          theme,
+          mode,
+          session_code: code,
+        })
+        .select()
+        .single();
+      if (!insertError) {
+        session = data as GameSession;
+      } else if (insertError.code === "23505") {
+        lastError = insertError.message;
+      } else {
+        lastError = insertError.message;
+        break;
+      }
+    }
+
+    if (!session) {
+      setBusy(false);
+      setError(lastError ?? "Could not create a session. Try again.");
+      return;
+    }
+
+    if (mode === "team" && selectedTeamIds.size > 0) {
+      const rows = Array.from(selectedTeamIds).map((team_id) => ({
+        session_id: session!.id,
+        team_id,
+      }));
+      const { error: teamsError } = await supabase
+        .from("session_teams")
+        .insert(rows);
+      if (teamsError) {
+        setBusy(false);
+        setError(
+          `Session created, but linking teams failed: ${teamsError.message}`
+        );
+        setCreated(session);
+        return;
+      }
+    }
+
+    setBusy(false);
+    setCreated(session);
+  }
+
+  function launchAnother() {
+    setCreated(null);
+    setError(null);
+    setSelectedTeamIds(new Set());
+  }
+
+  if (created) {
+    const courseName = courses.find((c) => c.id === created.course_id)?.name;
+    const weekLabel = weeks.find((w) => w.id === created.week_id)?.label;
+    return (
+      <div className="max-w-md space-y-4 rounded-lg border border-slate-800 p-6">
+        <p className="text-sm text-slate-400">
+          {courseName} — {weekLabel} · {created.mode} mode ·{" "}
+          {THEMES.find((t) => t.value === created.theme)?.label}
+        </p>
+        <div>
+          <p className="text-xs uppercase tracking-wide text-slate-500">
+            Session code
+          </p>
+          <p className="text-5xl font-black tracking-widest text-indigo-400">
+            {created.session_code}
+          </p>
+        </div>
+        <p className="text-sm text-slate-400">
+          Share this code with your class — they&apos;ll enter it at{" "}
+          <span className="text-slate-200">/join</span>.
+        </p>
+        <button
+          onClick={launchAnother}
+          className="rounded-md border border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
+        >
+          Launch another session
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={launch}
+      className="max-w-md space-y-4 rounded-lg border border-slate-800 p-6"
+    >
+      <div className="space-y-1">
+        <label className="text-sm text-slate-300">Course</label>
+        <select
+          value={courseId}
+          onChange={(e) => onCourseChange(e.target.value)}
+          className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+        >
+          {courses.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-sm text-slate-300">Week / topic</label>
+        <select
+          value={weekId}
+          onChange={(e) => setWeekId(e.target.value)}
+          className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+        >
+          {weeksForCourse.map((w) => (
+            <option key={w.id} value={w.id}>
+              {w.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-sm text-slate-300">Theme</label>
+        <div className="flex gap-2">
+          {THEMES.map((t) => (
+            <button
+              key={t.value}
+              type="button"
+              onClick={() => setTheme(t.value)}
+              className={`rounded-md px-3 py-1.5 text-sm ${
+                theme === t.value
+                  ? "bg-indigo-600 text-white"
+                  : "border border-slate-700 text-slate-300"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-sm text-slate-300">Mode</label>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setMode("individual")}
+            className={`rounded-md px-3 py-1.5 text-sm ${
+              mode === "individual"
+                ? "bg-indigo-600 text-white"
+                : "border border-slate-700 text-slate-300"
+            }`}
+          >
+            Individual
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("team")}
+            className={`rounded-md px-3 py-1.5 text-sm ${
+              mode === "team"
+                ? "bg-indigo-600 text-white"
+                : "border border-slate-700 text-slate-300"
+            }`}
+          >
+            Team
+          </button>
+        </div>
+      </div>
+
+      {mode === "team" && (
+        <div className="space-y-2 rounded-md border border-slate-800 p-3">
+          <p className="text-sm text-slate-300">
+            Teams available to join this session
+          </p>
+          <div className="space-y-1">
+            {teams.map((t) => (
+              <label
+                key={t.id}
+                className="flex items-center gap-2 text-sm text-slate-200"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedTeamIds.has(t.id)}
+                  onChange={() => toggleTeam(t.id)}
+                  className="accent-indigo-600"
+                />
+                {t.name}
+              </label>
+            ))}
+            {teams.length === 0 && (
+              <p className="text-xs text-slate-500">No teams yet.</p>
+            )}
+          </div>
+          <div className="flex gap-2 pt-1">
+            <input
+              value={newTeamName}
+              onChange={(e) => setNewTeamName(e.target.value)}
+              placeholder="New team name"
+              className="flex-1 rounded-md border border-slate-700 bg-slate-950 px-2 py-1.5 text-sm text-slate-100 outline-none focus:border-indigo-500"
+            />
+            <button
+              type="button"
+              onClick={addTeam}
+              disabled={teamBusy}
+              className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:border-slate-500 disabled:opacity-50"
+            >
+              Add team
+            </button>
+          </div>
+        </div>
+      )}
+
+      {error && <p className="text-sm text-red-400">{error}</p>}
+
+      <button
+        type="submit"
+        disabled={busy || !courseId || !weekId}
+        className="w-full rounded-md bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-50"
+      >
+        {busy ? "Launching…" : "Launch session"}
+      </button>
+    </form>
+  );
+}
