@@ -110,7 +110,7 @@ export default function WeekListClient({
           value={newLabel}
           onChange={(e) => setNewLabel(e.target.value)}
           placeholder="New week/topic label"
-          className="flex-1 rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+          className="flex-1 rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
         />
         <button
           type="submit"
@@ -121,7 +121,7 @@ export default function WeekListClient({
         </button>
       </form>
 
-      <ul className="divide-y divide-slate-800 rounded-lg border border-slate-800">
+      <ul className="divide-y divide-slate-800 rounded-lg border-2 border-slate-800">
         {weeks.map((w) => (
           <li key={w.id} className="flex flex-col gap-2 px-4 py-3">
             <div className="flex items-center justify-between gap-4">
@@ -137,13 +137,13 @@ export default function WeekListClient({
               <div className="flex gap-2">
                 <button
                   onClick={() => renameWeek(w)}
-                  className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
+                  className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
                 >
                   Rename
                 </button>
                 <button
                   onClick={() => deleteWeek(w)}
-                  className="rounded-md border border-red-900 px-2 py-1 text-xs text-red-400 hover:border-red-600"
+                  className="rounded-md border-2 border-red-900 px-2 py-1 text-xs text-red-400 hover:border-red-600"
                 >
                   Delete
                 </button>

@@ -197,7 +197,7 @@ export default function QuestionEditorClient({
     <div className="space-y-6">
       <form
         onSubmit={generateWithAi}
-        className="space-y-3 rounded-lg border border-slate-800 p-4"
+        className="space-y-3 rounded-lg border-2 border-slate-800 p-4"
       >
         <h3 className="font-semibold text-slate-100">Generate with AI</h3>
         <textarea
@@ -205,13 +205,13 @@ export default function QuestionEditorClient({
           onChange={(e) => setAiTopic(e.target.value)}
           placeholder="Topic/material to cover (e.g. paste in notes, describe the concept)"
           rows={3}
-          className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+          className="w-full rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
         />
         <div className="flex flex-wrap items-center gap-3">
           <select
             value={aiType}
             onChange={(e) => setAiType(e.target.value as "mc" | "tf" | "mix")}
-            className="rounded-md border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 outline-none focus:border-indigo-500"
+            className="rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 outline-none focus:border-indigo-500"
           >
             <option value="mix">Mix MC + TF</option>
             <option value="mc">Multiple choice only</option>
@@ -225,7 +225,7 @@ export default function QuestionEditorClient({
               max={20}
               value={aiCount}
               onChange={(e) => setAiCount(parseInt(e.target.value, 10) || 5)}
-              className="w-16 rounded-md border border-slate-700 bg-slate-950 px-2 py-1.5 text-slate-100 outline-none focus:border-indigo-500"
+              className="w-16 rounded-md border-2 border-slate-700 bg-slate-950 px-2 py-1.5 text-slate-100 outline-none focus:border-indigo-500"
             />
           </label>
           <button
@@ -249,7 +249,7 @@ export default function QuestionEditorClient({
 
       <div className="grid gap-6 lg:grid-cols-2">
       <div>
-        <ul className="divide-y divide-slate-800 rounded-lg border border-slate-800">
+        <ul className="divide-y divide-slate-800 rounded-lg border-2 border-slate-800">
           {questions.map((q) => (
             <li
               key={q.id}
@@ -266,13 +266,13 @@ export default function QuestionEditorClient({
               <div className="flex shrink-0 gap-2">
                 <button
                   onClick={() => startEdit(q)}
-                  className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
+                  className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => deleteQuestion(q)}
-                  className="rounded-md border border-red-900 px-2 py-1 text-xs text-red-400 hover:border-red-600"
+                  className="rounded-md border-2 border-red-900 px-2 py-1 text-xs text-red-400 hover:border-red-600"
                 >
                   Delete
                 </button>
@@ -289,7 +289,7 @@ export default function QuestionEditorClient({
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-3 rounded-lg border border-slate-800 p-4"
+        className="space-y-3 rounded-lg border-2 border-slate-800 p-4"
       >
         <h3 className="font-semibold text-slate-100">
           {editingId ? "Edit question" : "New question"}
@@ -302,7 +302,7 @@ export default function QuestionEditorClient({
             className={`rounded-md px-3 py-1.5 text-sm ${
               form.type === "mc"
                 ? "bg-indigo-600 text-[var(--bg)]"
-                : "border border-slate-700 text-slate-300"
+                : "border-2 border-slate-700 text-slate-300"
             }`}
           >
             Multiple choice
@@ -313,7 +313,7 @@ export default function QuestionEditorClient({
             className={`rounded-md px-3 py-1.5 text-sm ${
               form.type === "tf"
                 ? "bg-indigo-600 text-[var(--bg)]"
-                : "border border-slate-700 text-slate-300"
+                : "border-2 border-slate-700 text-slate-300"
             }`}
           >
             True / False
@@ -325,7 +325,7 @@ export default function QuestionEditorClient({
           onChange={(e) => setForm((p) => ({ ...p, prompt: e.target.value }))}
           placeholder="Question prompt"
           rows={3}
-          className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+          className="w-full rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
         />
 
         <div className="space-y-2">
@@ -343,7 +343,7 @@ export default function QuestionEditorClient({
                 onChange={(e) => setChoice(i, e.target.value)}
                 disabled={form.type === "tf"}
                 placeholder={`Choice ${i + 1}`}
-                className="flex-1 rounded-md border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 outline-none focus:border-indigo-500 disabled:opacity-60"
+                className="flex-1 rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 outline-none focus:border-indigo-500 disabled:opacity-60"
               />
               {form.type === "mc" && form.choices.length > 2 && (
                 <button
@@ -374,7 +374,7 @@ export default function QuestionEditorClient({
           }
           placeholder="Explanation (shown after answering, optional)"
           rows={2}
-          className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+          className="w-full rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
         />
 
         {error && <p className="text-sm text-red-400">{error}</p>}
@@ -391,7 +391,7 @@ export default function QuestionEditorClient({
             <button
               type="button"
               onClick={startNew}
-              className="rounded-md border border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
+              className="rounded-md border-2 border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
             >
               Cancel
             </button>

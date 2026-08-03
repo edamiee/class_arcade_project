@@ -156,7 +156,7 @@ export default function LaunchSessionClient({
     const courseName = courses.find((c) => c.id === created.course_id)?.name;
     const weekLabel = weeks.find((w) => w.id === created.week_id)?.label;
     return (
-      <div className="max-w-md space-y-4 rounded-lg border border-slate-800 p-6">
+      <div className="max-w-md space-y-4 rounded-lg border-2 border-slate-800 p-6">
         <p className="text-sm text-slate-400">
           {courseName} — {weekLabel} · {created.mode} mode ·{" "}
           {THEMES.find((t) => t.value === created.theme)?.label}
@@ -182,7 +182,7 @@ export default function LaunchSessionClient({
           </Link>
           <button
             onClick={launchAnother}
-            className="rounded-md border border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
+            className="rounded-md border-2 border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
           >
             Launch another session
           </button>
@@ -194,14 +194,14 @@ export default function LaunchSessionClient({
   return (
     <form
       onSubmit={launch}
-      className="max-w-md space-y-4 rounded-lg border border-slate-800 p-6"
+      className="max-w-md space-y-4 rounded-lg border-2 border-slate-800 p-6"
     >
       <div className="space-y-1">
         <label className="text-sm text-slate-300">Course</label>
         <select
           value={courseId}
           onChange={(e) => onCourseChange(e.target.value)}
-          className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+          className="w-full rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
         >
           {courses.map((c) => (
             <option key={c.id} value={c.id}>
@@ -216,7 +216,7 @@ export default function LaunchSessionClient({
         <select
           value={weekId}
           onChange={(e) => setWeekId(e.target.value)}
-          className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+          className="w-full rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
         >
           {weeksForCourse.map((w) => (
             <option key={w.id} value={w.id}>
@@ -237,7 +237,7 @@ export default function LaunchSessionClient({
               className={`rounded-md px-3 py-1.5 text-sm ${
                 theme === t.value
                   ? "bg-indigo-600 text-[var(--bg)]"
-                  : "border border-slate-700 text-slate-300"
+                  : "border-2 border-slate-700 text-slate-300"
               }`}
             >
               {t.label}
@@ -255,7 +255,7 @@ export default function LaunchSessionClient({
             className={`rounded-md px-3 py-1.5 text-sm ${
               mode === "individual"
                 ? "bg-indigo-600 text-[var(--bg)]"
-                : "border border-slate-700 text-slate-300"
+                : "border-2 border-slate-700 text-slate-300"
             }`}
           >
             Individual
@@ -266,7 +266,7 @@ export default function LaunchSessionClient({
             className={`rounded-md px-3 py-1.5 text-sm ${
               mode === "team"
                 ? "bg-indigo-600 text-[var(--bg)]"
-                : "border border-slate-700 text-slate-300"
+                : "border-2 border-slate-700 text-slate-300"
             }`}
           >
             Team
@@ -275,7 +275,7 @@ export default function LaunchSessionClient({
       </div>
 
       {mode === "team" && (
-        <div className="space-y-2 rounded-md border border-slate-800 p-3">
+        <div className="space-y-2 rounded-md border-2 border-slate-800 p-3">
           <p className="text-sm text-slate-300">
             Teams available to join this session
           </p>
@@ -303,13 +303,13 @@ export default function LaunchSessionClient({
               value={newTeamName}
               onChange={(e) => setNewTeamName(e.target.value)}
               placeholder="New team name"
-              className="flex-1 rounded-md border border-slate-700 bg-slate-950 px-2 py-1.5 text-sm text-slate-100 outline-none focus:border-indigo-500"
+              className="flex-1 rounded-md border-2 border-slate-700 bg-slate-950 px-2 py-1.5 text-sm text-slate-100 outline-none focus:border-indigo-500"
             />
             <button
               type="button"
               onClick={addTeam}
               disabled={teamBusy}
-              className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:border-slate-500 disabled:opacity-50"
+              className="rounded-md border-2 border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:border-slate-500 disabled:opacity-50"
             >
               Add team
             </button>

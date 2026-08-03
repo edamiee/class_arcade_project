@@ -13,19 +13,19 @@ export default function AdminHomePage() {
         </Link>
         <Link
           href="/admin/sessions/new"
-          className="inline-block rounded-md border border-slate-700 px-4 py-2 font-semibold text-slate-200 transition hover:border-slate-500"
+          className="inline-block rounded-md border-2 border-slate-700 px-4 py-2 font-semibold text-slate-200 transition hover:border-slate-500"
         >
           Launch a session
         </Link>
         <Link
           href="/admin/sessions"
-          className="inline-block rounded-md border border-slate-700 px-4 py-2 font-semibold text-slate-200 transition hover:border-slate-500"
+          className="inline-block rounded-md border-2 border-slate-700 px-4 py-2 font-semibold text-slate-200 transition hover:border-slate-500"
         >
           Sessions history
         </Link>
         <Link
           href="/admin/students"
-          className="inline-block rounded-md border border-slate-700 px-4 py-2 font-semibold text-slate-200 transition hover:border-slate-500"
+          className="inline-block rounded-md border-2 border-slate-700 px-4 py-2 font-semibold text-slate-200 transition hover:border-slate-500"
         >
           Students
         </Link>

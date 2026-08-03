@@ -75,7 +75,7 @@ export default function JoinPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
-      <div className="w-full max-w-sm space-y-4 rounded-xl border border-slate-800 bg-slate-900 p-8 shadow-xl">
+      <div className="w-full max-w-sm space-y-4 rounded-xl border-2 border-slate-800 bg-slate-900 p-8 shadow-xl">
         <h1 className="text-xl font-bold text-slate-100">
           Penelope&apos;s Learning Arcade
         </h1>
@@ -91,7 +91,7 @@ export default function JoinPage() {
               placeholder="CODE"
               autoFocus
               maxLength={8}
-              className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-3 text-center text-2xl font-black tracking-widest text-slate-100 outline-none focus:border-indigo-500"
+              className="w-full rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-3 text-center text-2xl font-black tracking-widest text-slate-100 outline-none focus:border-indigo-500"
             />
             {error && <p className="text-sm text-red-400">{error}</p>}
             <button
@@ -117,7 +117,7 @@ export default function JoinPage() {
                 onChange={(e) => setName(e.target.value)}
                 autoFocus
                 maxLength={60}
-                className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+                className="w-full rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
               />
             </div>
 

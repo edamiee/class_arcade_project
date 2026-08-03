@@ -127,7 +127,7 @@ export default function PlayGameClient({
     return (
       <div style={containerStyle} className="px-4 py-8">
         <div
-          className="mx-auto max-w-md space-y-4 rounded-xl border p-6"
+          className="mx-auto max-w-md space-y-4 rounded-xl border-2 p-6"
           style={{ background: colors.panel, borderColor: colors.panelEdge }}
         >
           <h1
@@ -151,7 +151,7 @@ export default function PlayGameClient({
               {missed.map((d, i) => (
                 <div
                   key={i}
-                  className="rounded-md border p-2 text-xs"
+                  className="rounded-md border-2 p-2 text-xs"
                   style={{ borderColor: colors.panelEdge }}
                 >
                   <p>{d.prompt}</p>
@@ -244,7 +244,7 @@ export default function PlayGameClient({
         )}
 
         <div
-          className="rounded-xl border p-5"
+          className="rounded-xl border-2 p-5"
           style={{ background: colors.panel, borderColor: colors.panelEdge }}
         >
           <p className="mb-4 text-sm" style={{ color: colors.muted }}>
@@ -259,23 +259,23 @@ export default function PlayGameClient({
           >
             {q!.choices.map((choice, i) => {
               let bg = colors.bg;
-              let border = colors.panelEdge;
+              let borderColor = colors.panelEdge;
               if (answered && i === q!.correctIndex) {
                 bg = colors.green;
-                border = colors.green;
+                borderColor = colors.green;
               } else if (answered && i === chosenIndex) {
                 bg = colors.red;
-                border = colors.red;
+                borderColor = colors.red;
               }
               return (
                 <button
                   key={i}
                   onClick={() => onChoiceClick(i)}
                   disabled={answered}
-                  className="rounded-md border px-4 py-3 text-left font-medium transition disabled:cursor-default"
+                  className="rounded-md border-2 px-4 py-3 text-left font-medium transition disabled:cursor-default"
                   style={{
                     background: bg,
-                    borderColor: border,
+                    borderColor: borderColor,
                     color:
                       answered && (i === q!.correctIndex || i === chosenIndex)
                         ? colors.bg
@@ -290,7 +290,7 @@ export default function PlayGameClient({
 
           {answered && showExplanation && q!.explanation && (
             <div
-              className="mt-4 rounded-md border p-3 text-sm"
+              className="mt-4 rounded-md border-2 p-3 text-sm"
               style={{ borderColor: colors.panelEdge, color: colors.cyan }}
             >
               <span className="mr-2 font-bold">

@@ -42,7 +42,7 @@ export default async function SessionsHistoryPage() {
         </Link>
       </div>
 
-      <ul className="divide-y divide-slate-800 rounded-lg border border-slate-800">
+      <ul className="divide-y divide-slate-800 rounded-lg border-2 border-slate-800">
         {((sessions as GameSession[] | null) ?? []).map((s) => (
           <li key={s.id}>
             <Link

@@ -102,7 +102,7 @@ export default function StudentsListClient({
   }
 
   return (
-    <ul className="divide-y divide-slate-800 rounded-lg border border-slate-800">
+    <ul className="divide-y divide-slate-800 rounded-lg border-2 border-slate-800">
       {students.map((s) => (
         <li key={s.id} className="space-y-2 px-4 py-3">
           <div className="flex items-center justify-between gap-4">
@@ -116,19 +116,19 @@ export default function StudentsListClient({
             <div className="flex gap-2">
               <button
                 onClick={() => renameStudent(s)}
-                className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
+                className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
               >
                 Rename
               </button>
               <button
                 onClick={() => startMerge(s.id)}
-                className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
+                className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
               >
                 Merge into…
               </button>
               <button
                 onClick={() => deleteStudent(s)}
-                className="rounded-md border border-red-900 px-2 py-1 text-xs text-red-400 hover:border-red-600"
+                className="rounded-md border-2 border-red-900 px-2 py-1 text-xs text-red-400 hover:border-red-600"
               >
                 Delete
               </button>
@@ -136,11 +136,11 @@ export default function StudentsListClient({
           </div>
 
           {mergingId === s.id && (
-            <div className="flex items-center gap-2 rounded-md border border-slate-800 p-2">
+            <div className="flex items-center gap-2 rounded-md border-2 border-slate-800 p-2">
               <select
                 value={mergeTargetId}
                 onChange={(e) => setMergeTargetId(e.target.value)}
-                className="flex-1 rounded-md border border-slate-700 bg-slate-950 px-2 py-1.5 text-sm text-slate-100 outline-none focus:border-indigo-500"
+                className="flex-1 rounded-md border-2 border-slate-700 bg-slate-950 px-2 py-1.5 text-sm text-slate-100 outline-none focus:border-indigo-500"
               >
                 <option value="">Merge &quot;{s.name}&quot; into…</option>
                 {students
@@ -160,7 +160,7 @@ export default function StudentsListClient({
               </button>
               <button
                 onClick={() => setMergingId(null)}
-                className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:border-slate-500"
+                className="rounded-md border-2 border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:border-slate-500"
               >
                 Cancel
               </button>

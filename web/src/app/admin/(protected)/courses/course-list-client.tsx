@@ -80,7 +80,7 @@ export default function CourseListClient({
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="New course name"
-          className="flex-1 rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+          className="flex-1 rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
         />
         <button
           type="submit"
@@ -91,7 +91,7 @@ export default function CourseListClient({
         </button>
       </form>
 
-      <ul className="divide-y divide-slate-800 rounded-lg border border-slate-800">
+      <ul className="divide-y divide-slate-800 rounded-lg border-2 border-slate-800">
         {courses.map((c) => (
           <li
             key={c.id}
@@ -109,13 +109,13 @@ export default function CourseListClient({
             <div className="flex gap-2">
               <button
                 onClick={() => renameCourse(c)}
-                className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
+                className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
               >
                 Rename
               </button>
               <button
                 onClick={() => deleteCourse(c)}
-                className="rounded-md border border-red-900 px-2 py-1 text-xs text-red-400 hover:border-red-600"
+                className="rounded-md border-2 border-red-900 px-2 py-1 text-xs text-red-400 hover:border-red-600"
               >
                 Delete
               </button>

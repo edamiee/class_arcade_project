@@ -34,7 +34,7 @@ export default function SessionResultsView({
           <h3 className="mb-2 text-lg font-bold text-slate-100">
             Team leaderboard
           </h3>
-          <ul className="divide-y divide-slate-800 rounded-lg border border-slate-800">
+          <ul className="divide-y divide-slate-800 rounded-lg border-2 border-slate-800">
             {teams.map((t, i) => (
               <li
                 key={t.teamId}
@@ -65,7 +65,7 @@ export default function SessionResultsView({
         <h3 className="mb-2 text-lg font-bold text-slate-100">
           Individual leaderboard
         </h3>
-        <ul className="divide-y divide-slate-800 rounded-lg border border-slate-800">
+        <ul className="divide-y divide-slate-800 rounded-lg border-2 border-slate-800">
           {individual.map((r, i) => (
             <li
               key={r.studentId}

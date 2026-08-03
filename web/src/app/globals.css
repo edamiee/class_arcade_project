@@ -139,3 +139,26 @@ h1 {
 button {
   cursor: pointer;
 }
+
+button:not(:disabled) {
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.45);
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+
+button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* Panel-style containers (list wrappers, cards) get the same hard pixel
+   drop-shadow as buttons, matching the original app's .panel style. Every
+   card/list wrapper in this app uses rounded-lg or rounded-xl as its
+   outer container class, so this catches them all without touching
+   component files. */
+[class*="rounded-xl"],
+[class*="rounded-lg"] {
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+}

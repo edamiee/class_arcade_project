@@ -36,7 +36,7 @@ export default function EndSessionButton({
     <button
       onClick={toggle}
       disabled={busy}
-      className={`rounded-md border px-3 py-1.5 text-sm disabled:opacity-50 ${
+      className={`rounded-md border-2 px-3 py-1.5 text-sm disabled:opacity-50 ${
         isOpen
           ? "border-red-900 text-red-400 hover:border-red-600"
           : "border-slate-700 text-slate-300 hover:border-slate-500"
