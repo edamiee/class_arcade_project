@@ -86,6 +86,7 @@ export default async function PlayPage() {
       courseName={course?.name ?? ""}
       weekLabel={typedWeek?.label ?? ""}
       showExplanation={typedWeek?.show_explanation !== false}
+      sessionCode={typedSession.session_code}
       questions={preparedQuestions}
     />
   );

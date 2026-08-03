@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { generateSessionCode } from "@/lib/session-code";
 import type { Course, Week, Team, GameSession, SessionMode } from "@/lib/types";
@@ -172,12 +173,20 @@ export default function LaunchSessionClient({
           Share this code with your class — they&apos;ll enter it at{" "}
           <span className="text-slate-200">/join</span>.
         </p>
-        <button
-          onClick={launchAnother}
-          className="rounded-md border border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
-        >
-          Launch another session
-        </button>
+        <div className="flex gap-2">
+          <Link
+            href={`/admin/sessions/${created.id}`}
+            className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-500"
+          >
+            View results
+          </Link>
+          <button
+            onClick={launchAnother}
+            className="rounded-md border border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
+          >
+            Launch another session
+          </button>
+        </div>
       </div>
     );
   }

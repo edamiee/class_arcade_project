@@ -23,6 +23,7 @@ export default function PlayGameClient({
   courseName,
   weekLabel,
   showExplanation,
+  sessionCode,
   questions,
 }: {
   studentName: string;
@@ -31,6 +32,7 @@ export default function PlayGameClient({
   courseName: string;
   weekLabel: string;
   showExplanation: boolean;
+  sessionCode: string;
   questions: PreparedQuestion[];
 }) {
   const colors = useMemo(() => themeColors(theme), [theme]);
@@ -176,9 +178,18 @@ export default function PlayGameClient({
               </p>
             )}
             {submitState === "done" && (
-              <p className="text-sm font-semibold" style={{ color: colors.green }}>
-                Submitted! Ask your teacher to show the results.
-              </p>
+              <div className="space-y-2">
+                <p className="text-sm font-semibold" style={{ color: colors.green }}>
+                  Submitted!
+                </p>
+                <a
+                  href={`/results/${sessionCode}`}
+                  className="block w-full rounded-md px-4 py-2 text-center font-semibold text-black"
+                  style={{ background: colors.yellow }}
+                >
+                  View results
+                </a>
+              </div>
             )}
             {submitState === "error" && (
               <div className="space-y-2">
