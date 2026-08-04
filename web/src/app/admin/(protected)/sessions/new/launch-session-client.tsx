@@ -200,12 +200,18 @@ export default function LaunchSessionClient({
           Share this code with your class — they&apos;ll enter it at{" "}
           <span className="text-slate-200">/join</span>.
         </p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link
             href={`/admin/sessions/${created.id}`}
             className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500"
           >
             View results
+          </Link>
+          <Link
+            href={`/admin/sessions/${created.id}/live`}
+            className="rounded-md border-2 border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
+          >
+            Watch live
           </Link>
           <button
             onClick={launchAnother}

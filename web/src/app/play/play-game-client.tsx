@@ -83,16 +83,27 @@ export default function PlayGameClient({
       });
     }
 
+    const chosenText = i === null ? "(no answer — time ran out)" : q.choices[i];
+    const correctText = q.choices[q.correctIndex];
+
     setLog((prev) => [
       ...prev,
-      {
-        prompt: q.prompt,
-        chosenText: i === null ? "(no answer — time ran out)" : q.choices[i],
-        correctText: q.choices[q.correctIndex],
-        correct,
-        explanation: q.explanation,
-      },
+      { prompt: q.prompt, chosenText, correctText, correct, explanation: q.explanation },
     ]);
+
+    // Fire-and-forget: powers the admin live feed / per-question chart.
+    // Must never block or break gameplay if it fails.
+    fetch("/api/play/answer", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        questionId: q.id,
+        prompt: q.prompt,
+        chosenText,
+        correctText,
+        correct,
+      }),
+    }).catch(() => {});
   }
 
   function onChoiceClick(i: number) {

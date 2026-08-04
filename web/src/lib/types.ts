@@ -73,3 +73,18 @@ export interface Attempt {
   details: AttemptDetail[];
   played_at: string;
 }
+
+export interface AnswerEvent {
+  id: string;
+  session_id: string;
+  student_id: string;
+  student_name: string;
+  question_id: string;
+  prompt: string;
+  chosen_text: string;
+  correct_text: string;
+  correct: boolean;
+  team_id: string | null;
+  team_name: string | null;
+  answered_at: string;
+}
