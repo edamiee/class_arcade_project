@@ -80,7 +80,7 @@ export default function JoinPage() {
       <div className="w-full max-w-sm space-y-4 rounded-xl border-2 border-slate-800 bg-slate-900 p-8 shadow-xl">
         <div className="flex items-center gap-3">
           <MascotHeader />
-          <h1 className="text-xl font-bold text-slate-100">
+          <h1 className="brand-marquee text-xl font-bold">
             Penelope&apos;s Learning Arcade
           </h1>
         </div>

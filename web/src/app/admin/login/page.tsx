@@ -44,7 +44,8 @@ export default function AdminLoginPage() {
           <div>
             <h1 className="text-xl font-bold text-slate-100">Admin Login</h1>
             <p className="text-sm text-slate-400">
-              Penelope&apos;s Learning Arcade — admin only.
+              <span className="brand-marquee">Penelope&apos;s Learning Arcade</span> —
+              admin only.
             </p>
           </div>
         </div>

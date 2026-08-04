@@ -39,7 +39,7 @@ export default async function ProtectedAdminLayout({
         <div className="flex items-center gap-3">
           <MascotHeader />
           <div>
-            <h1 className="text-lg font-bold">Penelope&apos;s Learning Arcade</h1>
+            <h1 className="brand-marquee text-lg font-bold">Penelope&apos;s Learning Arcade</h1>
             <p className="text-xs text-slate-500">Admin</p>
           </div>
         </div>
