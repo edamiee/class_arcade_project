@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Course, Week, Question } from "@/lib/types";
 import QuestionEditorClient from "./question-editor-client";
+import TeachingTipsPanel from "./teaching-tips-panel";
 
 export default async function WeekDetailPage({
   params,
@@ -34,15 +35,25 @@ export default async function WeekDetailPage({
 
   return (
     <div className="space-y-4">
-      <div>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <Link
+            href={`/admin/courses/${courseId}`}
+            className="text-sm text-slate-400 hover:text-indigo-400"
+          >
+            ← {(course as Course).name}
+          </Link>
+          <h2 className="text-2xl font-bold">{(week as Week).label}</h2>
+        </div>
         <Link
-          href={`/admin/courses/${courseId}`}
-          className="text-sm text-slate-400 hover:text-indigo-400"
+          href={`/admin/courses/${courseId}/weeks/${weekId}/print`}
+          target="_blank"
+          className="shrink-0 rounded-md border-2 border-slate-700 px-3 py-2 text-sm text-slate-300 hover:border-slate-500"
         >
-          ← {(course as Course).name}
+          Print Q&amp;A
         </Link>
-        <h2 className="text-2xl font-bold">{(week as Week).label}</h2>
       </div>
+      <TeachingTipsPanel weekId={weekId} />
       <QuestionEditorClient
         weekId={weekId}
         initialQuestions={(questions ?? []) as Question[]}

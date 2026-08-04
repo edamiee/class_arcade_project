@@ -1,5 +1,6 @@
 import type { SessionResults } from "@/lib/session-results";
 import ChaseStrip from "@/components/chase-strip";
+import IndividualLeaderboardAdmin from "@/components/individual-leaderboard-admin";
 
 const THEME_LABELS: Record<string, string> = {
   pac: "PAC",
@@ -9,8 +10,10 @@ const THEME_LABELS: Record<string, string> = {
 
 export default function SessionResultsView({
   results,
+  showAdminActions = false,
 }: {
   results: SessionResults;
+  showAdminActions?: boolean;
 }) {
   const { session, courseName, weekLabel, individual, teams } = results;
   const topTeamId = teams && teams.length > 0 ? teams[0].teamId : null;
@@ -98,53 +101,53 @@ export default function SessionResultsView({
         <h3 className="mb-2 text-lg font-bold text-slate-100">
           Individual leaderboard
         </h3>
-        <ul className="divide-y-2 divide-slate-800 rounded-lg border-2 border-slate-800">
-          {individual.map((r, i) => (
-            <li
-              key={r.studentId}
-              className={`flex items-center justify-between px-4 py-3 ${
-                i === 0 ? "winner-badge" : ""
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <span className={i === 0 ? "text-xs" : "text-xs text-slate-500"}>
-                  #{i + 1}
-                </span>
-                {i === 0 && <span>🏆</span>}
-                <span className={i === 0 ? "font-bold" : "text-slate-100"}>
-                  {r.name}
-                </span>
-                {r.teamName && (
-                  <span className={i === 0 ? "text-xs" : "text-xs text-slate-500"}>
-                    {r.teamName}
-                  </span>
-                )}
-              </span>
-              <span
-                className={
-                  i === 0
-                    ? "text-sm font-bold"
-                    : "text-sm text-slate-400"
-                }
+        {showAdminActions ? (
+          <IndividualLeaderboardAdmin individual={individual} />
+        ) : (
+          <ul className="divide-y-2 divide-slate-800 rounded-lg border-2 border-slate-800">
+            {individual.map((r, i) => (
+              <li
+                key={r.studentId}
+                className={`flex items-center justify-between px-4 py-3 ${
+                  i === 0 ? "winner-badge" : ""
+                }`}
               >
+                <span className="flex items-center gap-2">
+                  <span className={i === 0 ? "text-xs" : "text-xs text-slate-500"}>
+                    #{i + 1}
+                  </span>
+                  {i === 0 && <span>🏆</span>}
+                  <span className={i === 0 ? "font-bold" : "text-slate-100"}>
+                    {r.name}
+                  </span>
+                  {r.teamName && (
+                    <span className={i === 0 ? "text-xs" : "text-xs text-slate-500"}>
+                      {r.teamName}
+                    </span>
+                  )}
+                </span>
                 <span
-                  className="text-xl font-black"
-                  style={
-                    i === 0
-                      ? undefined
-                      : {
-                          color: "var(--yellow)",
-                          textShadow: "0 0 8px rgba(255,212,0,0.7)",
-                        }
-                  }
+                  className={i === 0 ? "text-sm font-bold" : "text-sm text-slate-400"}
                 >
-                  {r.score}
-                </span>{" "}
-                pts · {r.correctCount}/{r.total} correct
-              </span>
-            </li>
-          ))}
-        </ul>
+                  <span
+                    className="text-xl font-black"
+                    style={
+                      i === 0
+                        ? undefined
+                        : {
+                            color: "var(--yellow)",
+                            textShadow: "0 0 8px rgba(255,212,0,0.7)",
+                          }
+                    }
+                  >
+                    {r.score}
+                  </span>{" "}
+                  pts · {r.correctCount}/{r.total} correct
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

@@ -147,6 +147,18 @@ button {
   cursor: pointer;
 }
 
+/* The admin chrome (dark header/nav) has no business on a printed
+   worksheet — the print page itself opts back in to a plain layout via
+   its own .no-print / inline styling, this just removes the app shell. */
+@media print {
+  header {
+    display: none !important;
+  }
+  body::after {
+    display: none !important;
+  }
+}
+
 button:not(:disabled) {
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.45);
 }

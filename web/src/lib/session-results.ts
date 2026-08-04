@@ -4,6 +4,7 @@ import type { GameSession, Attempt } from "@/lib/types";
 
 export interface IndividualResult {
   studentId: string;
+  attemptId: string;
   name: string;
   score: number;
   total: number;
@@ -87,6 +88,7 @@ async function buildResults(session: GameSession): Promise<SessionResults> {
   const individual: IndividualResult[] = Array.from(bestByStudent.values())
     .map((row) => ({
       studentId: row.student_id,
+      attemptId: row.id,
       name: row.students?.name ?? "Unknown",
       score: row.score,
       total: row.total,

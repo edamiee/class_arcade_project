@@ -30,7 +30,7 @@ export default async function AdminSessionDetailPage({
           isOpen={results.session.is_open}
         />
       </div>
-      <SessionResultsView results={results} />
+      <SessionResultsView results={results} showAdminActions />
     </div>
   );
 }
