@@ -292,18 +292,9 @@ export default function PlayGameClient({
           className="rounded-xl border-2 p-5"
           style={{ background: colors.panel, borderColor: colors.panelEdge }}
         >
-          <div className="mb-4 flex items-center justify-between">
-            <p className="text-sm" style={{ color: colors.muted }}>
-              Q{index + 1}/{questions.length}
-            </p>
-            <button
-              onClick={quit}
-              className="text-xs underline"
-              style={{ color: colors.muted }}
-            >
-              Quit
-            </button>
-          </div>
+          <p className="mb-4 text-sm" style={{ color: colors.muted }}>
+            Q{index + 1}/{questions.length}
+          </p>
 
           {timerSeconds > 0 && (
             <div className="mb-4 flex items-center gap-2">
@@ -388,6 +379,16 @@ export default function PlayGameClient({
               {index + 1 >= questions.length || gameOver ? "Finish" : "Next"}
             </button>
           )}
+        </div>
+
+        <div className="text-center">
+          <button
+            onClick={quit}
+            className="text-xs underline"
+            style={{ color: colors.muted }}
+          >
+            Quit
+          </button>
         </div>
       </div>
     </div>

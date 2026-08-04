@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Course } from "@/lib/types";
 import CourseListClient from "./course-list-client";
@@ -20,7 +21,15 @@ export default async function CoursesPage() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Courses</h2>
+      <div>
+        <Link
+          href="/admin"
+          className="text-sm text-slate-400 hover:text-indigo-400"
+        >
+          ← Dashboard
+        </Link>
+        <h2 className="text-2xl font-bold">Courses</h2>
+      </div>
       <CourseListClient
         initialCourses={(courses ?? []) as Course[]}
         weekCounts={weekCounts}

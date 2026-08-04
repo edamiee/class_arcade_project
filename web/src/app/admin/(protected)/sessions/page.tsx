@@ -1,12 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Course, Week, GameSession, Attempt } from "@/lib/types";
-
-const THEME_LABELS: Record<string, string> = {
-  pac: "PAC",
-  blocks: "BLOCKS",
-  plumber: "PLUMBER",
-};
+import SessionsListClient, { type SessionRow } from "./sessions-list-client";
 
 export default async function SessionsHistoryPage() {
   const supabase = await createClient();
@@ -30,56 +25,39 @@ export default async function SessionsHistoryPage() {
     attemptCounts.set(a.session_id, (attemptCounts.get(a.session_id) ?? 0) + 1);
   });
 
+  const rows: SessionRow[] = ((sessions as GameSession[] | null) ?? []).map((s) => ({
+    id: s.id,
+    courseName: courseNames.get(s.course_id) ?? "Unknown course",
+    weekLabel: weekLabels.get(s.week_id) ?? "Unknown week",
+    theme: s.theme,
+    mode: s.mode,
+    code: s.session_code,
+    createdAt: s.created_at,
+    attemptCount: attemptCounts.get(s.id) ?? 0,
+    isOpen: s.is_open,
+  }));
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Sessions history</h2>
+      <div>
         <Link
-          href="/admin/sessions/new"
-          className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500"
+          href="/admin"
+          className="text-sm text-slate-400 hover:text-indigo-400"
         >
-          Launch a session
+          ← Dashboard
         </Link>
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Sessions history</h2>
+          <Link
+            href="/admin/sessions/new"
+            className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500"
+          >
+            Launch a session
+          </Link>
+        </div>
       </div>
 
-      <ul className="divide-y divide-slate-800 rounded-lg border-2 border-slate-800">
-        {((sessions as GameSession[] | null) ?? []).map((s) => (
-          <li key={s.id}>
-            <Link
-              href={`/admin/sessions/${s.id}`}
-              className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-slate-900"
-            >
-              <div>
-                <p className="text-slate-100">
-                  {courseNames.get(s.course_id) ?? "Unknown course"} —{" "}
-                  {weekLabels.get(s.week_id) ?? "Unknown week"}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {THEME_LABELS[s.theme] ?? s.theme} · {s.mode} mode · code{" "}
-                  {s.session_code} · {new Date(s.created_at).toLocaleString()}
-                </p>
-              </div>
-              <div className="flex items-center gap-3 text-xs text-slate-400">
-                <span>{attemptCounts.get(s.id) ?? 0} attempt(s)</span>
-                <span
-                  className={`rounded px-2 py-0.5 ${
-                    s.is_open
-                      ? "bg-emerald-950 text-emerald-400"
-                      : "bg-slate-800 text-slate-400"
-                  }`}
-                >
-                  {s.is_open ? "OPEN" : "ENDED"}
-                </span>
-              </div>
-            </Link>
-          </li>
-        ))}
-        {(!sessions || sessions.length === 0) && (
-          <li className="px-4 py-6 text-center text-sm text-slate-500">
-            No sessions launched yet.
-          </li>
-        )}
-      </ul>
+      <SessionsListClient initialRows={rows} />
     </div>
   );
 }

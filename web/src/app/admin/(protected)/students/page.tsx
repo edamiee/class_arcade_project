@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Student, Attempt } from "@/lib/types";
 import StudentsListClient from "./students-list-client";
@@ -17,7 +18,15 @@ export default async function StudentsPage() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Students</h2>
+      <div>
+        <Link
+          href="/admin"
+          className="text-sm text-slate-400 hover:text-indigo-400"
+        >
+          ← Dashboard
+        </Link>
+        <h2 className="text-2xl font-bold">Students</h2>
+      </div>
       <p className="text-sm text-slate-400">
         Everyone who has ever joined a session, matched by name. Rename to
         fix typos, or merge duplicates (e.g. &quot;Bob&quot; and
