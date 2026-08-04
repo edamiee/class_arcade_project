@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/require-admin";
 import { callClaude } from "@/lib/anthropic";
+import { stripLeadingNumbering } from "@/lib/sanitize-label";
 import type { QuestionType } from "@/lib/types";
 
 interface GeneratedQuestion {
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
     `${weeksInstruction} Each week must have exactly ${questionsPerWeek} questions. ${typeInstruction} ` +
     'For type "mc" provide exactly 4 choices. For type "tf" choices must be exactly ["True","False"]. ' +
     "correctIndex is the 0-based index into choices of the correct answer. " +
-    "Each week's label should be a short, descriptive topic title drawn from the document, not \"Week 1\"/\"Week 2\". " +
+    "Each week's label should be a short, descriptive topic title drawn from the document — no numbering or ordinal prefix of any kind (not \"Week 1\", \"Unit 2:\", \"1.\", \"Q3 -\", etc.), just the topic name itself. " +
     'The player only ever sees the plain text in "prompt" and "choices" — there is no image, table, chart, or diagram rendered anywhere else. ' +
     "Every question MUST be fully self-contained in its prompt: never depend on a table, dataset, chart, or diagram the player is supposed to look at. " +
     "If a question needs sample data to make sense, write that data directly into the prompt as plain text.";
@@ -128,9 +129,11 @@ export async function POST(request: Request) {
   for (const w of parsed.weeks) {
     if (!w.label || !Array.isArray(w.questions) || w.questions.length === 0) continue;
 
+    const cleanLabel = stripLeadingNumbering(String(w.label)).slice(0, 200);
+
     const { data: weekRow, error: weekError } = await admin.supabase
       .from("weeks")
-      .insert({ course_id: courseId, label: String(w.label).slice(0, 200) })
+      .insert({ course_id: courseId, label: cleanLabel })
       .select()
       .single();
     if (weekError || !weekRow) continue;
