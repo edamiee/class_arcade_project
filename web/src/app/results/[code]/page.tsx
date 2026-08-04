@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getSessionResultsByCode } from "@/lib/session-results";
 import SessionResultsView from "@/components/session-results-view";
+import { MascotHeader } from "@/components/mascot";
 
 export default async function PublicResultsPage({
   params,
@@ -12,9 +13,15 @@ export default async function PublicResultsPage({
   if (!results) notFound();
 
   return (
-    <div className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100">
+    <div
+      data-theme={results.session.theme}
+      className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100"
+    >
       <div className="mx-auto max-w-lg space-y-4">
-        <h1 className="text-2xl font-bold">Results</h1>
+        <div className="flex items-center gap-3">
+          <MascotHeader />
+          <h1 className="text-2xl font-bold">Results</h1>
+        </div>
         <SessionResultsView results={results} />
       </div>
     </div>

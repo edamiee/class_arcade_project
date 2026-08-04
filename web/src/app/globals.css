@@ -583,3 +583,22 @@ button:active:not(:disabled) {
   right: 5px;
   transform: rotate(-15deg);
 }
+
+/* ---- Winner badge: shifting rainbow gradient, ported from index.html's
+   #team-leaderboard .team-badge.winner / .super-badge ---- */
+@keyframes super-badge-shift {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 300% 50%;
+  }
+}
+.winner-badge {
+  color: #1a1400;
+  background: linear-gradient(90deg, var(--yellow), var(--pink), var(--cyan), var(--yellow));
+  background-size: 300% 100%;
+  animation: super-badge-shift 1.2s linear infinite;
+  border: 2px solid #fff !important;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.6) !important;
+}
