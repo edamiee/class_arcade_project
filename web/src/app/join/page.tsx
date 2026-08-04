@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { MascotHeader } from "@/components/mascot";
+import ChaseStrip from "@/components/chase-strip";
 
 interface LookupResult {
   valid: boolean;
@@ -74,11 +76,14 @@ export default function JoinPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-950 px-4 py-8">
       <div className="w-full max-w-sm space-y-4 rounded-xl border-2 border-slate-800 bg-slate-900 p-8 shadow-xl">
-        <h1 className="text-xl font-bold text-slate-100">
-          Penelope&apos;s Learning Arcade
-        </h1>
+        <div className="flex items-center gap-3">
+          <MascotHeader />
+          <h1 className="text-xl font-bold text-slate-100">
+            Penelope&apos;s Learning Arcade
+          </h1>
+        </div>
 
         {step === "code" && (
           <form onSubmit={submitCode} className="space-y-4">
@@ -165,6 +170,9 @@ export default function JoinPage() {
             </button>
           </form>
         )}
+      </div>
+      <div className="w-full max-w-sm">
+        <ChaseStrip theme={lookup?.theme ?? "pac"} />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { MascotHeader } from "@/components/mascot";
 import LogoutButton from "./logout-button";
 
 // Guards everything under /admin (except /admin/login, which lives outside
@@ -35,9 +36,12 @@ export default async function ProtectedAdminLayout({
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <header className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
-        <div>
-          <h1 className="text-lg font-bold">Penelope&apos;s Learning Arcade</h1>
-          <p className="text-xs text-slate-500">Admin</p>
+        <div className="flex items-center gap-3">
+          <MascotHeader />
+          <div>
+            <h1 className="text-lg font-bold">Penelope&apos;s Learning Arcade</h1>
+            <p className="text-xs text-slate-500">Admin</p>
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm text-slate-400">{user.email}</span>

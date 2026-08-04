@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { MascotHeader } from "@/components/mascot";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -38,10 +39,15 @@ export default function AdminLoginPage() {
         onSubmit={handleSubmit}
         className="w-full max-w-sm space-y-4 rounded-xl border-2 border-slate-800 bg-slate-900 p-8 shadow-xl"
       >
-        <h1 className="text-xl font-bold text-slate-100">Admin Login</h1>
-        <p className="text-sm text-slate-400">
-          Penelope&apos;s Learning Arcade — admin only.
-        </p>
+        <div className="flex items-center gap-3">
+          <MascotHeader />
+          <div>
+            <h1 className="text-xl font-bold text-slate-100">Admin Login</h1>
+            <p className="text-sm text-slate-400">
+              Penelope&apos;s Learning Arcade — admin only.
+            </p>
+          </div>
+        </div>
 
         <div className="space-y-1">
           <label htmlFor="email" className="text-sm text-slate-300">

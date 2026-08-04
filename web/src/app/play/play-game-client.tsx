@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { themeColors } from "@/lib/theme-colors";
 import { playCorrectSound, playLifeLostSound } from "@/lib/sound";
+import { MascotEnd } from "@/components/mascot";
+import LifeIcon from "@/components/life-icon";
 import type { AttemptDetail, QuestionType } from "@/lib/types";
 
 export interface PreparedQuestion {
@@ -125,7 +127,7 @@ export default function PlayGameClient({
     const correctCount = log.filter((d) => d.correct).length;
     const missed = log.filter((d) => !d.correct);
     return (
-      <div style={containerStyle} className="px-4 py-8">
+      <div style={containerStyle} data-theme={theme} className="px-4 py-8">
         <div
           className="mx-auto max-w-md space-y-4 rounded-xl border-2 p-6"
           style={{ background: colors.panel, borderColor: colors.panelEdge }}
@@ -136,6 +138,9 @@ export default function PlayGameClient({
           >
             {gameOver ? "GAME OVER" : "ROUND COMPLETE"}
           </h1>
+          <div className="flex justify-center">
+            <MascotEnd />
+          </div>
           <p className="text-lg">
             Score: <span style={{ color: colors.green }}>{score}</span>
           </p>
@@ -212,7 +217,7 @@ export default function PlayGameClient({
   }
 
   return (
-    <div style={containerStyle} className="px-4 py-8">
+    <div style={containerStyle} data-theme={theme} className="px-4 py-8">
       <div className="mx-auto max-w-md space-y-4">
         <div className="flex items-center justify-between text-sm">
           <span style={{ color: colors.muted }}>
@@ -228,9 +233,10 @@ export default function PlayGameClient({
           <span className="text-lg font-bold" style={{ color: colors.green }}>
             Score: {score}
           </span>
-          <span className="text-lg" style={{ color: colors.red }}>
-            {"♥".repeat(Math.max(0, lives))}
-            {"♡".repeat(Math.max(0, LIVES - lives))}
+          <span className="flex gap-1.5">
+            {Array.from({ length: LIVES }, (_, i) => (
+              <LifeIcon key={i} lost={i >= lives} />
+            ))}
           </span>
         </div>
 
