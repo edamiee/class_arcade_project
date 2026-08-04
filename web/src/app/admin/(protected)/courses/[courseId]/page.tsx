@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Course, Week } from "@/lib/types";
 import WeekListClient from "./week-list-client";
+import GenerateFromDocumentPanel from "./generate-from-document-panel";
 
 export default async function CourseDetailPage({
   params,
@@ -46,7 +47,9 @@ export default async function CourseDetailPage({
         </Link>
         <h2 className="text-2xl font-bold">{(course as Course).name}</h2>
       </div>
+      <GenerateFromDocumentPanel courseId={courseId} />
       <WeekListClient
+        key={(weeks ?? []).length}
         courseId={courseId}
         initialWeeks={(weeks ?? []) as Week[]}
         questionCounts={questionCounts}

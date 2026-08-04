@@ -16,10 +16,12 @@ export default function LaunchSessionClient({
   courses,
   weeks,
   initialTeams,
+  questionCounts,
 }: {
   courses: Course[];
   weeks: Week[];
   initialTeams: Team[];
+  questionCounts: Record<string, number>;
 }) {
   const [courseId, setCourseId] = useState(courses[0]?.id ?? "");
   const weeksForCourse = useMemo(
@@ -29,6 +31,10 @@ export default function LaunchSessionClient({
   const [weekId, setWeekId] = useState(weeksForCourse[0]?.id ?? "");
   const [theme, setTheme] = useState("pac");
   const [mode, setMode] = useState<SessionMode>("individual");
+
+  const weekTotal = questionCounts[weekId] ?? 0;
+  const [questionCount, setQuestionCount] = useState(weekTotal);
+  const [timerSeconds, setTimerSeconds] = useState(0);
 
   const [teams, setTeams] = useState(initialTeams);
   const [selectedTeamIds, setSelectedTeamIds] = useState<Set<string>>(
@@ -45,6 +51,12 @@ export default function LaunchSessionClient({
     setCourseId(id);
     const first = weeks.find((w) => w.course_id === id);
     setWeekId(first?.id ?? "");
+    setQuestionCount(questionCounts[first?.id ?? ""] ?? 0);
+  }
+
+  function onWeekChange(id: string) {
+    setWeekId(id);
+    setQuestionCount(questionCounts[id] ?? 0);
   }
 
   function toggleTeam(id: string) {
@@ -89,6 +101,14 @@ export default function LaunchSessionClient({
       setError("Pick at least one team, or switch to individual mode.");
       return;
     }
+    if (weekTotal === 0) {
+      setError("This week has no questions yet.");
+      return;
+    }
+    if (questionCount < 1 || questionCount > weekTotal) {
+      setError(`Number of questions must be between 1 and ${weekTotal}.`);
+      return;
+    }
 
     setBusy(true);
     const supabase = createClient();
@@ -105,6 +125,8 @@ export default function LaunchSessionClient({
           theme,
           mode,
           session_code: code,
+          question_count: questionCount,
+          timer_seconds: timerSeconds,
         })
         .select()
         .single();
@@ -159,7 +181,12 @@ export default function LaunchSessionClient({
       <div className="max-w-md space-y-4 rounded-lg border-2 border-slate-800 p-6">
         <p className="text-sm text-slate-400">
           {courseName} — {weekLabel} · {created.mode} mode ·{" "}
-          {THEMES.find((t) => t.value === created.theme)?.label}
+          {THEMES.find((t) => t.value === created.theme)?.label} ·{" "}
+          {created.question_count ?? "all"} question
+          {created.question_count === 1 ? "" : "s"}
+          {created.timer_seconds > 0
+            ? ` · ${created.timer_seconds}s/question`
+            : " · no timer"}
         </p>
         <div>
           <p className="text-xs uppercase tracking-wide text-slate-500">
@@ -215,15 +242,46 @@ export default function LaunchSessionClient({
         <label className="text-sm text-slate-300">Week / topic</label>
         <select
           value={weekId}
-          onChange={(e) => setWeekId(e.target.value)}
+          onChange={(e) => onWeekChange(e.target.value)}
           className="w-full rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
         >
           {weeksForCourse.map((w) => (
             <option key={w.id} value={w.id}>
-              {w.label}
+              {w.label} ({questionCounts[w.id] ?? 0} question
+              {(questionCounts[w.id] ?? 0) === 1 ? "" : "s"})
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-sm text-slate-300">
+            Number of questions
+          </label>
+          <input
+            type="number"
+            min={1}
+            max={weekTotal || undefined}
+            value={questionCount}
+            onChange={(e) => setQuestionCount(parseInt(e.target.value, 10) || 0)}
+            className="w-full rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+          />
+          <p className="text-xs text-slate-500">{weekTotal} available</p>
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm text-slate-300">
+            Time per question, sec
+          </label>
+          <input
+            type="number"
+            min={0}
+            value={timerSeconds}
+            onChange={(e) => setTimerSeconds(parseInt(e.target.value, 10) || 0)}
+            className="w-full rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+          />
+          <p className="text-xs text-slate-500">0 = no timer</p>
+        </div>
       </div>
 
       <div className="space-y-1">
@@ -321,7 +379,7 @@ export default function LaunchSessionClient({
 
       <button
         type="submit"
-        disabled={busy || !courseId || !weekId}
+        disabled={busy || !courseId || !weekId || weekTotal === 0}
         className="w-full rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500 disabled:opacity-50"
       >
         {busy ? "Launching…" : "Launch session"}

@@ -42,6 +42,8 @@ export interface GameSession {
   mode: SessionMode;
   session_code: string;
   is_open: boolean;
+  question_count: number | null;
+  timer_seconds: number;
   created_at: string;
 }
 

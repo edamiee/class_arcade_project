@@ -76,7 +76,10 @@ export default async function PlayPage() {
   }
 
   const orderedPool = typedWeek?.random_order !== false ? shuffle(pool) : pool;
-  const preparedQuestions = orderedPool.map(shuffleChoices);
+  const sliced = typedSession.question_count
+    ? orderedPool.slice(0, typedSession.question_count)
+    : orderedPool;
+  const preparedQuestions = sliced.map(shuffleChoices);
 
   return (
     <PlayGameClient
@@ -87,6 +90,7 @@ export default async function PlayPage() {
       weekLabel={typedWeek?.label ?? ""}
       showExplanation={typedWeek?.show_explanation !== false}
       sessionCode={typedSession.session_code}
+      timerSeconds={typedSession.timer_seconds}
       questions={preparedQuestions}
     />
   );

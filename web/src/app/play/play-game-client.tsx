@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { themeColors } from "@/lib/theme-colors";
 import { playCorrectSound, playLifeLostSound } from "@/lib/sound";
 import { MascotEnd } from "@/components/mascot";
@@ -26,6 +27,7 @@ export default function PlayGameClient({
   weekLabel,
   showExplanation,
   sessionCode,
+  timerSeconds,
   questions,
 }: {
   studentName: string;
@@ -35,8 +37,10 @@ export default function PlayGameClient({
   weekLabel: string;
   showExplanation: boolean;
   sessionCode: string;
+  timerSeconds: number;
   questions: PreparedQuestion[];
 }) {
+  const router = useRouter();
   const colors = useMemo(() => themeColors(theme), [theme]);
 
   const [index, setIndex] = useState(0);
@@ -47,6 +51,7 @@ export default function PlayGameClient({
   const [answered, setAnswered] = useState(false);
   const [chosenIndex, setChosenIndex] = useState<number | null>(null);
   const [log, setLog] = useState<AttemptDetail[]>([]);
+  const [timerRemaining, setTimerRemaining] = useState(timerSeconds);
 
   const [submitState, setSubmitState] = useState<
     "idle" | "submitting" | "done" | "error"
@@ -56,12 +61,12 @@ export default function PlayGameClient({
   const q = !finished ? questions[index] : null;
   const isSuper = streak >= 3;
 
-  function onChoiceClick(i: number) {
+  function recordAnswer(i: number | null) {
     if (!q || answered) return;
     setAnswered(true);
     setChosenIndex(i);
 
-    const correct = i === q.correctIndex;
+    const correct = i !== null && i === q.correctIndex;
     const wasSuper = streak >= 3;
 
     if (correct) {
@@ -82,7 +87,7 @@ export default function PlayGameClient({
       ...prev,
       {
         prompt: q.prompt,
-        chosenText: q.choices[i],
+        chosenText: i === null ? "(no answer — time ran out)" : q.choices[i],
         correctText: q.choices[q.correctIndex],
         correct,
         explanation: q.explanation,
@@ -90,10 +95,41 @@ export default function PlayGameClient({
     ]);
   }
 
+  function onChoiceClick(i: number) {
+    recordAnswer(i);
+  }
+
+  // Per-question countdown. Restarts on every new question and stops as
+  // soon as the question is answered (manually or by timing out) — keyed
+  // on `answered` too so the interval from a question the player already
+  // answered can never fire a stale expiry against the next question.
+  useEffect(() => {
+    if (!q || timerSeconds <= 0 || answered) return;
+    setTimerRemaining(timerSeconds);
+    const start = Date.now();
+    const interval = setInterval(() => {
+      const remaining = timerSeconds - (Date.now() - start) / 1000;
+      if (remaining <= 0) {
+        setTimerRemaining(0);
+        clearInterval(interval);
+        recordAnswer(null);
+      } else {
+        setTimerRemaining(remaining);
+      }
+    }, 100);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, timerSeconds, answered]);
+
   function nextQuestion() {
     setAnswered(false);
     setChosenIndex(null);
     setIndex((i) => i + 1);
+  }
+
+  function quit() {
+    if (!confirm("Quit this game? Progress will be lost.")) return;
+    router.push("/join");
   }
 
   async function submitResults() {
@@ -216,6 +252,9 @@ export default function PlayGameClient({
     );
   }
 
+  const timerPct = timerSeconds > 0 ? Math.max(0, (timerRemaining / timerSeconds) * 100) : 0;
+  const timerLow = timerPct <= 25;
+
   return (
     <div style={containerStyle} data-theme={theme} className="px-4 py-8">
       <div className="mx-auto max-w-md space-y-4">
@@ -253,9 +292,39 @@ export default function PlayGameClient({
           className="rounded-xl border-2 p-5"
           style={{ background: colors.panel, borderColor: colors.panelEdge }}
         >
-          <p className="mb-4 text-sm" style={{ color: colors.muted }}>
-            Q{index + 1}/{questions.length}
-          </p>
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-sm" style={{ color: colors.muted }}>
+              Q{index + 1}/{questions.length}
+            </p>
+            <button
+              onClick={quit}
+              className="text-xs underline"
+              style={{ color: colors.muted }}
+            >
+              Quit
+            </button>
+          </div>
+
+          {timerSeconds > 0 && (
+            <div className="mb-4 flex items-center gap-2">
+              <div
+                className="h-3 flex-1 overflow-hidden border-2"
+                style={{ background: colors.bg, borderColor: colors.panelEdge }}
+              >
+                <div
+                  className="h-full transition-[width]"
+                  style={{
+                    width: `${timerPct}%`,
+                    background: timerLow ? colors.red : colors.yellow,
+                  }}
+                />
+              </div>
+              <span className="text-xs font-bold" style={{ color: colors.yellow }}>
+                {Math.ceil(Math.max(0, timerRemaining))}s
+              </span>
+            </div>
+          )}
+
           <p className="mb-5 text-lg font-semibold">{q!.prompt}</p>
 
           <div
@@ -300,7 +369,11 @@ export default function PlayGameClient({
               style={{ borderColor: colors.panelEdge, color: colors.cyan }}
             >
               <span className="mr-2 font-bold">
-                {chosenIndex === q!.correctIndex ? "CORRECT!" : "EXPLANATION"}
+                {chosenIndex === null
+                  ? "TIME'S UP!"
+                  : chosenIndex === q!.correctIndex
+                    ? "CORRECT!"
+                    : "EXPLANATION"}
               </span>
               {q!.explanation}
             </div>
