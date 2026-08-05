@@ -91,7 +91,11 @@ export default function IndividualLeaderboardAdmin({
                 <button
                   onClick={() => generate(r)}
                   disabled={s.kind === "loading"}
-                  className="shrink-0 rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500 disabled:opacity-50"
+                  className={
+                    i === 0
+                      ? "shrink-0 rounded-md border-2 border-black/40 px-2 py-1 text-xs font-semibold text-black hover:border-black/70 disabled:opacity-50"
+                      : "shrink-0 rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500 disabled:opacity-50"
+                  }
                 >
                   {s.kind === "loading" ? "…" : "Tips"}
                 </button>

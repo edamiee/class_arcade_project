@@ -253,8 +253,7 @@ export default function LaunchSessionClient({
         >
           {weeksForCourse.map((w) => (
             <option key={w.id} value={w.id}>
-              {w.label} ({questionCounts[w.id] ?? 0} question
-              {(questionCounts[w.id] ?? 0) === 1 ? "" : "s"})
+              {w.label}
             </option>
           ))}
         </select>

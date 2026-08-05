@@ -61,7 +61,7 @@
   --color-slate-900: var(--panel);
   --color-slate-800: var(--panel-edge);
   --color-slate-700: var(--panel-edge);
-  --color-slate-500: var(--panel-edge-hover);
+  --color-slate-500: var(--muted);
   --color-slate-400: var(--muted);
   --color-slate-300: var(--muted);
   --color-slate-200: var(--text);
