@@ -34,8 +34,14 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // /admin/accept-invite must stay reachable without a cookie session: the
+  // invite link's session-establishing token arrives in the URL hash
+  // fragment, which the server never sees, only the browser — so on the
+  // very first request there's no cookie yet, only after client-side JS
+  // parses the hash and syncs a session to cookies.
   const path = request.nextUrl.pathname;
-  if (!user && path.startsWith("/admin") && path !== "/admin/login") {
+  const publicAdminPaths = ["/admin/login", "/admin/accept-invite"];
+  if (!user && path.startsWith("/admin") && !publicAdminPaths.includes(path)) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     return NextResponse.redirect(url);
