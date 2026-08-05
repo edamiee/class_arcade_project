@@ -128,6 +128,12 @@ export default function SessionsListClient({
                 </span>
               </div>
             </Link>
+            <Link
+              href={`/admin/sessions/${s.id}/live`}
+              className="shrink-0 rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
+            >
+              Live
+            </Link>
             <button
               onClick={() => deleteIds([s.id])}
               disabled={busy}
