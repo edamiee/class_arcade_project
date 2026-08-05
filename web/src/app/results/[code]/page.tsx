@@ -22,7 +22,13 @@ export default async function PublicResultsPage({
           <MascotHeader />
           <h1 className="text-2xl font-bold">Results</h1>
         </div>
-        <SessionResultsView results={results} />
+        {results.session.is_open ? (
+          <SessionResultsView results={results} />
+        ) : (
+          <p className="text-sm text-slate-400">
+            This session has ended. Ask your teacher for the results.
+          </p>
+        )}
       </div>
     </div>
   );
