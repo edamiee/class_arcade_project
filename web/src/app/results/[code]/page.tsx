@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSessionResultsByCode } from "@/lib/session-results";
 import SessionResultsView from "@/components/session-results-view";
@@ -29,6 +30,12 @@ export default async function PublicResultsPage({
             This session has ended. Ask your teacher for the results.
           </p>
         )}
+        <Link
+          href="/join"
+          className="inline-block text-sm text-slate-400 hover:text-indigo-400"
+        >
+          ← Join another session
+        </Link>
       </div>
     </div>
   );
