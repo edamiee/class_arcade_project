@@ -270,14 +270,14 @@ export default function PlayGameClient({
   return (
     <div style={containerStyle} data-theme={theme} className="px-4 py-8">
       <div className="mx-auto max-w-md space-y-4">
-        <div className="flex items-center justify-between text-sm">
-          <span style={{ color: colors.muted }}>
+        <div className="space-y-0.5 text-sm" style={{ color: colors.muted }}>
+          <p>
             {studentName}
             {teamName ? ` · ${teamName}` : ""}
-          </span>
-          <span style={{ color: colors.muted }}>
+          </p>
+          <p>
             {courseName} — {weekLabel}
-          </span>
+          </p>
         </div>
 
         <div className="flex items-center justify-between">
