@@ -19,6 +19,49 @@ export default function StudentsListClient({
   const [mergingId, setMergingId] = useState<string | null>(null);
   const [mergeTargetId, setMergeTargetId] = useState("");
   const [busy, setBusy] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  function toggleSelected(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAllSelected() {
+    setSelected((prev) =>
+      prev.size === students.length ? new Set() : new Set(students.map((s) => s.id))
+    );
+  }
+
+  async function deleteSelected() {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    const totalAttempts = ids.reduce((sum, id) => sum + (counts[id] ?? 0), 0);
+    if (
+      !confirm(
+        `Delete ${ids.length} student${ids.length === 1 ? "" : "s"} and all their recorded attempts (${totalAttempts} total)? This can't be undone.`
+      )
+    )
+      return;
+    setBulkBusy(true);
+    const supabase = createClient();
+    const { error } = await supabase.from("students").delete().in("id", ids);
+    setBulkBusy(false);
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    setStudents((prev) => prev.filter((s) => !ids.includes(s.id)));
+    setSelected((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => next.delete(id));
+      return next;
+    });
+  }
 
   async function renameStudent(student: Student) {
     const name = prompt("Rename student:", student.name);
@@ -111,39 +154,69 @@ export default function StudentsListClient({
   }
 
   return (
-    <ul className="arcade-bezel divide-y divide-slate-800">
+    <div className="space-y-2">
+      {students.length > 0 && (
+        <div className="flex items-center gap-3 text-xs text-slate-400">
+          <label className="flex items-center gap-1.5">
+            <input
+              type="checkbox"
+              checked={selected.size === students.length}
+              onChange={toggleAllSelected}
+              className="accent-indigo-600"
+            />
+            Select all
+          </label>
+          <button
+            onClick={deleteSelected}
+            disabled={selected.size === 0 || bulkBusy}
+            className="rounded-md border-2 border-red-900 px-2 py-1 text-red-400 hover:border-red-600 disabled:opacity-40"
+          >
+            Delete selected ({selected.size})
+          </button>
+        </div>
+      )}
+
+      <ul className="arcade-bezel divide-y divide-slate-800">
       {students.map((s) => (
         <li key={s.id} className="space-y-2 px-4 py-3">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <span className="text-slate-100">{s.name}</span>
-              <span className="ml-2 text-xs text-slate-500">
-                {counts[s.id] ?? 0} attempt(s) · joined{" "}
-                {new Date(s.created_at).toLocaleDateString()}
-              </span>
-              <p className="text-xs text-slate-500">
-                {classes[s.id]?.length ? classes[s.id].join(", ") : "No classes yet"}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => renameStudent(s)}
-                className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
-              >
-                Rename
-              </button>
-              <button
-                onClick={() => startMerge(s.id)}
-                className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
-              >
-                Merge into…
-              </button>
-              <button
-                onClick={() => deleteStudent(s)}
-                className="rounded-md border-2 border-red-900 px-2 py-1 text-xs text-red-400 hover:border-red-600"
-              >
-                Delete
-              </button>
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={selected.has(s.id)}
+              onChange={() => toggleSelected(s.id)}
+              className="accent-indigo-600"
+            />
+            <div className="flex flex-1 items-center justify-between gap-4">
+              <div>
+                <span className="text-slate-100">{s.name}</span>
+                <span className="ml-2 text-xs text-slate-500">
+                  {counts[s.id] ?? 0} attempt(s) · joined{" "}
+                  {new Date(s.created_at).toLocaleDateString()}
+                </span>
+                <p className="text-xs text-slate-500">
+                  {classes[s.id]?.length ? classes[s.id].join(", ") : "No classes yet"}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => renameStudent(s)}
+                  className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
+                >
+                  Rename
+                </button>
+                <button
+                  onClick={() => startMerge(s.id)}
+                  className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
+                >
+                  Merge into…
+                </button>
+                <button
+                  onClick={() => deleteStudent(s)}
+                  className="rounded-md border-2 border-red-900 px-2 py-1 text-xs text-red-400 hover:border-red-600"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
 
@@ -185,6 +258,7 @@ export default function StudentsListClient({
           No students have joined yet.
         </li>
       )}
-    </ul>
+      </ul>
+    </div>
   );
 }

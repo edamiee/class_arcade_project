@@ -66,3 +66,16 @@ export function QuizIcon() {
     </IconBase>
   );
 }
+
+export function TrophyIcon() {
+  return (
+    <IconBase>
+      <path d="M8 4h8v5a4 4 0 0 1-8 0V4Z" />
+      <path d="M8 5H5.5a2.5 2.5 0 0 0 2.5 4" />
+      <path d="M16 5h2.5a2.5 2.5 0 0 1-2.5 4" />
+      <path d="M12 13v3" />
+      <path d="M9 20h6" />
+      <path d="M9.5 20c0-2 1-3.5 2.5-3.5s2.5 1.5 2.5 3.5" />
+    </IconBase>
+  );
+}

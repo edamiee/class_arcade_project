@@ -37,10 +37,10 @@ export default function SessionResultsView({
 
       {teams && teams.length > 0 && (
         <div>
-          <h3 className="mb-2 text-lg font-bold text-slate-100">
+          <h3 className="mb-2 text-lg font-bold" style={{ color: "var(--cyan)" }}>
             Team leaderboard
           </h3>
-          <ul className="divide-y-2 divide-slate-800 rounded-lg border-2 border-slate-800">
+          <ul className="arcade-bezel divide-y-2 divide-slate-800">
             {teams.map((t, i) => (
               <li
                 key={t.teamId}
@@ -98,13 +98,13 @@ export default function SessionResultsView({
       )}
 
       <div>
-        <h3 className="mb-2 text-lg font-bold text-slate-100">
+        <h3 className="mb-2 text-lg font-bold" style={{ color: "var(--cyan)" }}>
           Individual leaderboard
         </h3>
         {showAdminActions ? (
           <IndividualLeaderboardAdmin individual={individual} />
         ) : (
-          <ul className="divide-y-2 divide-slate-800 rounded-lg border-2 border-slate-800">
+          <ul className="arcade-bezel divide-y-2 divide-slate-800">
             {individual.map((r, i) => (
               <li
                 key={r.studentId}

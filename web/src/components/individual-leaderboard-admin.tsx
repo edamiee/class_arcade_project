@@ -51,7 +51,7 @@ export default function IndividualLeaderboardAdmin({
   }
 
   return (
-    <ul className="divide-y-2 divide-slate-800 rounded-lg border-2 border-slate-800">
+    <ul className="arcade-bezel divide-y-2 divide-slate-800">
       {individual.map((r, i) => {
         const s = status[r.attemptId] ?? { kind: "idle" };
         return (

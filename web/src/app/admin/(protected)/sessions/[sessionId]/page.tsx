@@ -4,6 +4,7 @@ import { getSessionResultsById } from "@/lib/session-results";
 import { getSessionQuestionStats } from "@/lib/session-question-stats";
 import SessionResultsView from "@/components/session-results-view";
 import SessionQuestionChart from "@/components/session-question-chart";
+import { TrophyIcon } from "@/components/dashboard-icons";
 import EndSessionButton from "./end-session-button";
 
 export default async function AdminSessionDetailPage({
@@ -27,20 +28,25 @@ export default async function AdminSessionDetailPage({
           >
             ← Dashboard
           </Link>
-          <h2 className="text-2xl font-bold">Session results</h2>
+          <div className="flex items-center gap-3">
+            <span className="dc-icon">
+              <TrophyIcon />
+            </span>
+            <h2 className="brand-marquee text-2xl font-bold">Session results</h2>
+          </div>
         </div>
         <div className="flex shrink-0 gap-2">
           <a
             href={`/admin/sessions/${sessionId}/present`}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-md border-2 border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:border-slate-500"
+            className="rounded-md border-2 border-slate-700 px-3 py-1.5 text-sm text-slate-300 transition hover:border-[var(--cyan)]"
           >
             Present for class
           </a>
           <Link
             href={`/admin/sessions/${sessionId}/live`}
-            className="rounded-md border-2 border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:border-slate-500"
+            className="rounded-md border-2 border-slate-700 px-3 py-1.5 text-sm text-slate-300 transition hover:border-[var(--cyan)]"
           >
             Watch live
           </Link>
@@ -53,10 +59,12 @@ export default async function AdminSessionDetailPage({
       <SessionResultsView results={results} showAdminActions />
 
       <div>
-        <h3 className="mb-2 text-lg font-bold text-slate-100">
+        <h3 className="mb-2 text-lg font-bold" style={{ color: "var(--cyan)" }}>
           Per-question results
         </h3>
-        <SessionQuestionChart theme={results.session.theme} stats={questionStats} />
+        <div className="arcade-bezel p-4">
+          <SessionQuestionChart theme={results.session.theme} stats={questionStats} />
+        </div>
       </div>
     </div>
   );
