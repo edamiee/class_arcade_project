@@ -35,7 +35,7 @@ export default async function ProtectedAdminLayout({
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
+      <header className="flex flex-col gap-3 border-b border-slate-800 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex items-center gap-3">
           <MascotHeader />
           <div>
@@ -43,12 +43,12 @@ export default async function ProtectedAdminLayout({
             <p className="text-xs text-slate-500">Admin</p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-slate-400">{user.email}</span>
+        <div className="flex items-center justify-between gap-4 sm:justify-end">
+          <span className="truncate text-sm text-slate-400">{user.email}</span>
           <LogoutButton />
         </div>
       </header>
-      <main className="p-6">{children}</main>
+      <main className="p-4 sm:p-6">{children}</main>
     </div>
   );
 }
