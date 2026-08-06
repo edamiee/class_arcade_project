@@ -80,9 +80,10 @@ export default async function PresentSessionPage({
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-10">
-        <div className="scale-150">
-          <JoinQrCode url={`${origin}/join?code=${typedSession.session_code}`} />
-        </div>
+        <JoinQrCode
+          url={`${origin}/join?code=${typedSession.session_code}`}
+          size={240}
+        />
         <div>
           <p className="text-sm uppercase tracking-wide text-slate-500">
             Session code
