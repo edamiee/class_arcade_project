@@ -100,7 +100,10 @@ function JoinForm() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-950 px-4 py-8">
+    <div
+      data-theme={lookup?.theme ?? "pac"}
+      className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-950 px-4 py-8"
+    >
       <div className="w-full max-w-sm space-y-4 rounded-xl border-2 border-slate-800 bg-slate-900 p-8 shadow-xl">
         <div className="flex items-center gap-3">
           <MascotHeader />
