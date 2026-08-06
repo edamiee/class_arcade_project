@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { MascotHeader } from "@/components/mascot";
 import ChaseStrip from "@/components/chase-strip";
 
@@ -15,7 +15,16 @@ interface LookupResult {
 }
 
 export default function JoinPage() {
+  return (
+    <Suspense>
+      <JoinForm />
+    </Suspense>
+  );
+}
+
+function JoinForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<"code" | "details">("code");
   const [code, setCode] = useState("");
   const [lookup, setLookup] = useState<LookupResult | null>(null);
@@ -24,9 +33,8 @@ export default function JoinPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function submitCode(e: React.FormEvent) {
-    e.preventDefault();
-    const trimmed = code.trim();
+  async function lookupCode(rawCode: string) {
+    const trimmed = rawCode.trim();
     if (!trimmed) return;
     setError(null);
     setBusy(true);
@@ -42,6 +50,22 @@ export default function JoinPage() {
     setLookup(data);
     setTeamId(data.teams?.[0]?.id ?? "");
     setStep("details");
+  }
+
+  // A QR code scan lands here with ?code=XXXXX in the URL — skip straight
+  // past manual code entry to the name/team step.
+  useEffect(() => {
+    const fromQr = searchParams.get("code");
+    if (fromQr) {
+      setCode(fromQr.toUpperCase());
+      lookupCode(fromQr);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function submitCode(e: React.FormEvent) {
+    e.preventDefault();
+    await lookupCode(code);
   }
 
   async function submitDetails(e: React.FormEvent) {

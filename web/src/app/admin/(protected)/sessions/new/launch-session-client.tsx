@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { generateSessionCode } from "@/lib/session-code";
+import JoinQrCode from "@/components/join-qr-code";
 import type { Course, Week, Team, GameSession, SessionMode } from "@/lib/types";
 
 const THEMES: { value: string; label: string }[] = [
@@ -188,16 +189,22 @@ export default function LaunchSessionClient({
             ? ` · ${created.timer_seconds}s/question`
             : " · no timer"}
         </p>
-        <div>
-          <p className="text-xs uppercase tracking-wide text-slate-500">
-            Session code
-          </p>
-          <p className="text-5xl font-black tracking-widest text-indigo-400">
-            {created.session_code}
-          </p>
+        <div className="flex flex-wrap items-center gap-4">
+          <JoinQrCode
+            url={`${typeof window !== "undefined" ? window.location.origin : ""}/join?code=${created.session_code}`}
+          />
+          <div>
+            <p className="text-xs uppercase tracking-wide text-slate-500">
+              Session code
+            </p>
+            <p className="text-5xl font-black tracking-widest text-indigo-400">
+              {created.session_code}
+            </p>
+          </div>
         </div>
         <p className="text-sm text-slate-400">
-          Share this code with your class — they&apos;ll enter it at{" "}
+          Students on phones/tablets can scan the QR code. On a laptop,
+          they&apos;ll enter the code at{" "}
           <span className="text-slate-200">/join</span>.
         </p>
         <div className="flex flex-wrap gap-2">
