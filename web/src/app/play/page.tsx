@@ -88,7 +88,7 @@ export default async function PlayPage() {
       theme={typedSession.theme}
       courseName={course?.name ?? ""}
       weekLabel={typedWeek?.label ?? ""}
-      showExplanation={typedWeek?.show_explanation !== false}
+      explanationMode={typedWeek?.explanation_mode ?? "immediate"}
       sessionCode={typedSession.session_code}
       timerSeconds={typedSession.timer_seconds}
       questions={preparedQuestions}

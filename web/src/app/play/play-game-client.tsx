@@ -7,7 +7,7 @@ import { playCorrectSound, playLifeLostSound } from "@/lib/sound";
 import { MascotEnd } from "@/components/mascot";
 import LifeIcon from "@/components/life-icon";
 import JoystickIcon from "@/components/joystick-icon";
-import type { AttemptDetail, QuestionType } from "@/lib/types";
+import type { AttemptDetail, ExplanationMode, QuestionType } from "@/lib/types";
 
 export interface PreparedQuestion {
   id: string;
@@ -26,7 +26,7 @@ export default function PlayGameClient({
   theme,
   courseName,
   weekLabel,
-  showExplanation,
+  explanationMode,
   sessionCode,
   timerSeconds,
   questions,
@@ -36,7 +36,7 @@ export default function PlayGameClient({
   theme: string;
   courseName: string;
   weekLabel: string;
-  showExplanation: boolean;
+  explanationMode: ExplanationMode;
   sessionCode: string;
   timerSeconds: number;
   questions: PreparedQuestion[];
@@ -207,6 +207,11 @@ export default function PlayGameClient({
                   <p>{d.prompt}</p>
                   <p style={{ color: colors.red }}>Your answer: {d.chosenText}</p>
                   <p style={{ color: colors.green }}>Correct: {d.correctText}</p>
+                  {explanationMode !== "off" && d.explanation && (
+                    <p className="mt-1" style={{ color: colors.cyan }}>
+                      {d.explanation}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -361,7 +366,7 @@ export default function PlayGameClient({
             })}
           </div>
 
-          {answered && showExplanation && q!.explanation && (
+          {answered && explanationMode === "immediate" && q!.explanation && (
             <div
               className="mt-4 rounded-md border-2 p-3 text-sm"
               style={{ borderColor: colors.panelEdge, color: colors.cyan }}

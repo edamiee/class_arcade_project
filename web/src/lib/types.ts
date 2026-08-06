@@ -6,12 +6,14 @@ export interface Course {
   created_at: string;
 }
 
+export type ExplanationMode = "off" | "immediate" | "end";
+
 export interface Week {
   id: string;
   course_id: string;
   label: string;
   random_order: boolean;
-  show_explanation: boolean;
+  explanation_mode: ExplanationMode;
   created_at: string;
 }
 

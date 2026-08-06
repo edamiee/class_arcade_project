@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { Week } from "@/lib/types";
+import type { ExplanationMode, Week } from "@/lib/types";
 
 export default function WeekListClient({
   courseId,
@@ -87,19 +87,18 @@ export default function WeekListClient({
     );
   }
 
-  async function toggleShowExplanation(week: Week) {
+  async function updateExplanationMode(week: Week, explanation_mode: ExplanationMode) {
     const supabase = createClient();
-    const show_explanation = !week.show_explanation;
     const { error } = await supabase
       .from("weeks")
-      .update({ show_explanation })
+      .update({ explanation_mode })
       .eq("id", week.id);
     if (error) {
       alert(error.message);
       return;
     }
     setWeeks((prev) =>
-      prev.map((w) => (w.id === week.id ? { ...w, show_explanation } : w))
+      prev.map((w) => (w.id === week.id ? { ...w, explanation_mode } : w))
     );
   }
 
@@ -160,13 +159,18 @@ export default function WeekListClient({
                 Random order
               </label>
               <label className="flex items-center gap-1.5">
-                <input
-                  type="checkbox"
-                  checked={w.show_explanation}
-                  onChange={() => toggleShowExplanation(w)}
-                  className="accent-indigo-600"
-                />
-                Show explanation
+                Explanation
+                <select
+                  value={w.explanation_mode}
+                  onChange={(e) =>
+                    updateExplanationMode(w, e.target.value as ExplanationMode)
+                  }
+                  className="rounded-md border-2 border-slate-700 bg-slate-950 px-1.5 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500"
+                >
+                  <option value="off">Don&apos;t show</option>
+                  <option value="immediate">After each question</option>
+                  <option value="end">Only at the end</option>
+                </select>
               </label>
             </div>
           </li>
