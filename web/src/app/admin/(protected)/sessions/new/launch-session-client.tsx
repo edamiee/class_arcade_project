@@ -36,6 +36,7 @@ export default function LaunchSessionClient({
   const weekTotal = questionCounts[weekId] ?? 0;
   const [questionCount, setQuestionCount] = useState(weekTotal);
   const [timerSeconds, setTimerSeconds] = useState(0);
+  const [autoCloseMinutes, setAutoCloseMinutes] = useState(0);
 
   const [teams, setTeams] = useState(initialTeams);
   const [selectedTeamIds, setSelectedTeamIds] = useState<Set<string>>(
@@ -128,6 +129,10 @@ export default function LaunchSessionClient({
           session_code: code,
           question_count: questionCount,
           timer_seconds: timerSeconds,
+          auto_close_at:
+            autoCloseMinutes > 0
+              ? new Date(Date.now() + autoCloseMinutes * 60_000).toISOString()
+              : null,
         })
         .select()
         .single();
@@ -188,6 +193,9 @@ export default function LaunchSessionClient({
           {created.timer_seconds > 0
             ? ` · ${created.timer_seconds}s/question`
             : " · no timer"}
+          {created.auto_close_at
+            ? ` · auto-closes ${new Date(created.auto_close_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
+            : ""}
         </p>
         <div className="flex flex-wrap items-center gap-4">
           <JoinQrCode
@@ -306,6 +314,22 @@ export default function LaunchSessionClient({
           />
           <p className="text-xs text-slate-500">0 = no timer</p>
         </div>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-sm text-slate-300">
+          Auto-close after, minutes
+        </label>
+        <input
+          type="number"
+          min={0}
+          value={autoCloseMinutes}
+          onChange={(e) => setAutoCloseMinutes(parseInt(e.target.value, 10) || 0)}
+          className="w-full max-w-[120px] rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+        />
+        <p className="text-xs text-slate-500">
+          0 = stays open until you end it manually
+        </p>
       </div>
 
       <div className="space-y-1">

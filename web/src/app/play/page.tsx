@@ -5,6 +5,7 @@ import {
   STUDENT_SESSION_COOKIE,
   verifyStudentSessionToken,
 } from "@/lib/student-session";
+import { resolveSessionOpen } from "@/lib/session-lifecycle";
 import type { GameSession, Question, Week } from "@/lib/types";
 import PlayGameClient, { type PreparedQuestion } from "./play-game-client";
 
@@ -46,10 +47,10 @@ export default async function PlayPage() {
     .eq("id", payload.sessionId)
     .maybeSingle();
 
-  if (!session || !session.is_open) {
+  const typedSession = session as GameSession | null;
+  if (!typedSession || !(await resolveSessionOpen(supabase, typedSession))) {
     redirect("/join");
   }
-  const typedSession = session as GameSession;
 
   const [{ data: course }, { data: week }, { data: questions }] =
     await Promise.all([

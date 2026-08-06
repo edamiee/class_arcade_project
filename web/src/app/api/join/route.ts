@@ -4,6 +4,7 @@ import {
   createStudentSessionToken,
   STUDENT_SESSION_COOKIE,
 } from "@/lib/student-session";
+import { resolveSessionOpen } from "@/lib/session-lifecycle";
 import type { GameSession, Student, Team } from "@/lib/types";
 
 // Public — the actual join. Looks up-or-creates a student by name (matched
@@ -33,15 +34,14 @@ export async function POST(request: Request) {
     .from("sessions")
     .select("*")
     .eq("session_code", code)
-    .eq("is_open", true)
     .maybeSingle();
-  if (!session) {
+  const typedSession = session as GameSession | null;
+  if (!typedSession || !(await resolveSessionOpen(supabase, typedSession))) {
     return NextResponse.json(
       { error: "That code isn't open right now." },
       { status: 404 }
     );
   }
-  const typedSession = session as GameSession;
 
   let teamName: string | null = null;
   if (typedSession.mode === "team") {

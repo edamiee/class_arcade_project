@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { isSessionExpired } from "@/lib/session-lifecycle";
 import type { Course, Week, GameSession, Attempt } from "@/lib/types";
 import SessionsListClient, { type SessionRow } from "./sessions-list-client";
 
@@ -34,7 +35,7 @@ export default async function SessionsHistoryPage() {
     code: s.session_code,
     createdAt: s.created_at,
     attemptCount: attemptCounts.get(s.id) ?? 0,
-    isOpen: s.is_open,
+    isOpen: s.is_open && !isSessionExpired(s),
   }));
 
   return (

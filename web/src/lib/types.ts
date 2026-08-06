@@ -46,6 +46,7 @@ export interface GameSession {
   is_open: boolean;
   question_count: number | null;
   timer_seconds: number;
+  auto_close_at: string | null;
   created_at: string;
 }
 

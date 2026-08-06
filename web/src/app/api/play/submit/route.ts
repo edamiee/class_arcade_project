@@ -34,6 +34,20 @@ export async function POST(request: Request) {
   }
 
   const supabase = createAdminClient();
+
+  const { data: removed } = await supabase
+    .from("session_removed_students")
+    .select("student_id")
+    .eq("session_id", payload.sessionId)
+    .eq("student_id", payload.studentId)
+    .maybeSingle();
+  if (removed) {
+    return NextResponse.json(
+      { error: "You've been removed from this session." },
+      { status: 403 }
+    );
+  }
+
   const { error } = await supabase.from("attempts").insert({
     student_id: payload.studentId,
     session_id: payload.sessionId,

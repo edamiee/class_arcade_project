@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveSessionOpen } from "@/lib/session-lifecycle";
 import type { GameSession } from "@/lib/types";
 
 interface TeamRef {
@@ -23,13 +24,12 @@ export async function GET(request: Request) {
     .from("sessions")
     .select("*")
     .eq("session_code", code)
-    .eq("is_open", true)
     .maybeSingle();
 
-  if (!session) {
+  const typedSession = session as GameSession | null;
+  if (!typedSession || !(await resolveSessionOpen(supabase, typedSession))) {
     return NextResponse.json({ valid: false });
   }
-  const typedSession = session as GameSession;
 
   const [{ data: course }, { data: week }, { data: sessionTeams }] =
     await Promise.all([

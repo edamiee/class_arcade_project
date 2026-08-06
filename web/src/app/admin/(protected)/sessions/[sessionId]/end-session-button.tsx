@@ -22,7 +22,12 @@ export default function EndSessionButton({
     const supabase = createClient();
     const { error } = await supabase
       .from("sessions")
-      .update({ is_open: !isOpen })
+      .update(
+        // Reopening clears any prior auto-close deadline — otherwise an
+        // already-expired one would just flip it shut again on the next
+        // request that touches the session.
+        isOpen ? { is_open: false } : { is_open: true, auto_close_at: null }
+      )
       .eq("id", sessionId);
     setBusy(false);
     if (error) {

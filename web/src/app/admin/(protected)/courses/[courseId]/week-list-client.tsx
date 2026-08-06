@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { ExplanationMode, Week } from "@/lib/types";
+import type { ExplanationMode, Question, Week } from "@/lib/types";
 
 export default function WeekListClient({
   courseId,
@@ -19,6 +19,7 @@ export default function WeekListClient({
   const [weeks, setWeeks] = useState(initialWeeks);
   const [newLabel, setNewLabel] = useState("");
   const [busy, setBusy] = useState(false);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
 
   async function addWeek(e: React.FormEvent) {
     e.preventDefault();
@@ -57,6 +58,70 @@ export default function WeekListClient({
     setWeeks((prev) =>
       prev.map((w) => (w.id === week.id ? { ...w, label: trimmed } : w))
     );
+  }
+
+  async function duplicateWeek(week: Week) {
+    const label = prompt(
+      "Name for the duplicated week:",
+      `${week.label} (copy)`
+    );
+    if (label === null) return;
+    const trimmed = label.trim();
+    if (!trimmed) return;
+
+    setDuplicatingId(week.id);
+    const supabase = createClient();
+
+    const { data: newWeek, error: weekError } = await supabase
+      .from("weeks")
+      .insert({
+        course_id: courseId,
+        label: trimmed,
+        random_order: week.random_order,
+        explanation_mode: week.explanation_mode,
+      })
+      .select()
+      .single();
+    if (weekError) {
+      setDuplicatingId(null);
+      alert(weekError.message);
+      return;
+    }
+
+    const { data: sourceQuestions, error: fetchError } = await supabase
+      .from("questions")
+      .select("*")
+      .eq("week_id", week.id);
+    if (fetchError) {
+      setDuplicatingId(null);
+      alert(
+        `Week created, but reading its questions failed: ${fetchError.message}`
+      );
+      setWeeks((prev) => [...prev, newWeek as Week]);
+      router.refresh();
+      return;
+    }
+
+    if (sourceQuestions && sourceQuestions.length > 0) {
+      const rows = (sourceQuestions as Question[]).map((q) => ({
+        week_id: newWeek.id,
+        type: q.type,
+        prompt: q.prompt,
+        choices: q.choices,
+        correct_index: q.correct_index,
+        explanation: q.explanation,
+      }));
+      const { error: insertError } = await supabase
+        .from("questions")
+        .insert(rows);
+      if (insertError) {
+        alert(`Week created, but copying questions failed: ${insertError.message}`);
+      }
+    }
+
+    setDuplicatingId(null);
+    setWeeks((prev) => [...prev, newWeek as Week]);
+    router.refresh();
   }
 
   async function deleteWeek(week: Week) {
@@ -139,6 +204,13 @@ export default function WeekListClient({
                   className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
                 >
                   Rename
+                </button>
+                <button
+                  onClick={() => duplicateWeek(w)}
+                  disabled={duplicatingId === w.id}
+                  className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500 disabled:opacity-50"
+                >
+                  {duplicatingId === w.id ? "Duplicating…" : "Duplicate"}
                 </button>
                 <button
                   onClick={() => deleteWeek(w)}

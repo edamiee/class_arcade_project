@@ -1,5 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveSessionOpen } from "@/lib/session-lifecycle";
 import type { GameSession, Attempt } from "@/lib/types";
 
 export interface IndividualResult {
@@ -65,6 +66,11 @@ export async function getSessionResultsByCode(
 
 async function buildResults(session: GameSession): Promise<SessionResults> {
   const supabase = createAdminClient();
+
+  // Reflects an auto-close deadline that's since passed, even if nothing
+  // has flipped is_open in the DB yet — keeps both the admin session page
+  // and the public results page honest about whether it's really live.
+  session.is_open = await resolveSessionOpen(supabase, session);
 
   const [{ data: course }, { data: week }, { data: attempts }] =
     await Promise.all([
