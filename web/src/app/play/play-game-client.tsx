@@ -176,10 +176,7 @@ export default function PlayGameClient({
     const missed = log.filter((d) => !d.correct);
     return (
       <div style={containerStyle} data-theme={theme} className="px-4 py-8">
-        <div
-          className="mx-auto max-w-md space-y-4 rounded-xl border-2 p-6"
-          style={{ background: colors.panel, borderColor: colors.panelEdge }}
-        >
+        <div className="arcade-bezel mx-auto max-w-md space-y-4 rounded-xl p-6">
           <h1
             className="text-2xl font-black"
             style={{ color: colors.yellow }}
