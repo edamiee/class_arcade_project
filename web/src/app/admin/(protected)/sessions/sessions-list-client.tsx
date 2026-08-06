@@ -93,7 +93,7 @@ export default function SessionsListClient({
         </div>
       )}
 
-      <ul className="divide-y divide-slate-800 rounded-lg border-2 border-slate-800">
+      <ul className="arcade-bezel divide-y divide-slate-800">
         {rows.map((s) => (
           <li key={s.id} className="flex items-center gap-3 px-4 py-3">
             <input

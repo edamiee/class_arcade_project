@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { BookIcon } from "@/components/dashboard-icons";
 import type { Course } from "@/lib/types";
 import CourseListClient from "./course-list-client";
 
@@ -28,7 +29,12 @@ export default async function CoursesPage() {
         >
           ← Dashboard
         </Link>
-        <h2 className="text-2xl font-bold">Courses</h2>
+        <div className="flex items-center gap-3">
+          <span className="dc-icon">
+            <BookIcon />
+          </span>
+          <h2 className="brand-marquee text-2xl font-bold">Courses</h2>
+        </div>
       </div>
       <CourseListClient
         initialCourses={(courses ?? []) as Course[]}

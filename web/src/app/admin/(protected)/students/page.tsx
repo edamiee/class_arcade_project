@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { PeopleIcon } from "@/components/dashboard-icons";
 import type { Student, Attempt } from "@/lib/types";
 import StudentsListClient from "./students-list-client";
 
@@ -38,7 +39,12 @@ export default async function StudentsPage() {
         >
           ← Dashboard
         </Link>
-        <h2 className="text-2xl font-bold">Students</h2>
+        <div className="flex items-center gap-3">
+          <span className="dc-icon">
+            <PeopleIcon />
+          </span>
+          <h2 className="brand-marquee text-2xl font-bold">Students</h2>
+        </div>
       </div>
       <p className="text-sm text-slate-400">
         Everyone who has ever joined a session, matched by name. Rename to

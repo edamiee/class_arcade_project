@@ -91,7 +91,7 @@ export default function AdminsListClient({
       {status && <p className="text-sm text-emerald-400">{status}</p>}
       {error && <p className="text-sm text-red-400">{error}</p>}
 
-      <ul className="divide-y divide-slate-800 rounded-lg border-2 border-slate-800">
+      <ul className="arcade-bezel divide-y divide-slate-800">
         {admins.map((a) => {
           const isSelf = a.id === currentUserId;
           const isLast = admins.length <= 1;

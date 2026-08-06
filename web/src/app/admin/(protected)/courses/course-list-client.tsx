@@ -91,7 +91,7 @@ export default function CourseListClient({
         </button>
       </form>
 
-      <ul className="divide-y divide-slate-800 rounded-lg border-2 border-slate-800">
+      <ul className="arcade-bezel divide-y divide-slate-800">
         {courses.map((c) => (
           <li
             key={c.id}

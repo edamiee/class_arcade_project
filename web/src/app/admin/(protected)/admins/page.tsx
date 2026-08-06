@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { ShieldIcon } from "@/components/dashboard-icons";
 import AdminsListClient, { type AdminRow } from "./admins-list-client";
 
 export default async function AdminsPage() {
@@ -32,7 +33,12 @@ export default async function AdminsPage() {
         <Link href="/admin" className="text-sm text-slate-400 hover:text-indigo-400">
           ← Dashboard
         </Link>
-        <h2 className="text-2xl font-bold">Admins</h2>
+        <div className="flex items-center gap-3">
+          <span className="dc-icon">
+            <ShieldIcon />
+          </span>
+          <h2 className="brand-marquee text-2xl font-bold">Admins</h2>
+        </div>
         <p className="text-sm text-slate-400">
           Everyone listed here has full admin access — courses, sessions,
           students, everything.

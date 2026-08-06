@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { isSessionExpired } from "@/lib/session-lifecycle";
+import { ClockIcon } from "@/components/dashboard-icons";
 import type { Course, Week, GameSession, Attempt } from "@/lib/types";
 import SessionsListClient, { type SessionRow } from "./sessions-list-client";
 
@@ -48,7 +49,12 @@ export default async function SessionsHistoryPage() {
           ← Dashboard
         </Link>
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Sessions history</h2>
+          <div className="flex items-center gap-3">
+            <span className="dc-icon">
+              <ClockIcon />
+            </span>
+            <h2 className="brand-marquee text-2xl font-bold">Sessions history</h2>
+          </div>
           <Link
             href="/admin/sessions/new"
             className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500"
