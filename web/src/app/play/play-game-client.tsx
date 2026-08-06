@@ -6,6 +6,7 @@ import { themeColors } from "@/lib/theme-colors";
 import { playCorrectSound, playLifeLostSound } from "@/lib/sound";
 import { MascotEnd } from "@/components/mascot";
 import LifeIcon from "@/components/life-icon";
+import JoystickIcon from "@/components/joystick-icon";
 import type { AttemptDetail, QuestionType } from "@/lib/types";
 
 export interface PreparedQuestion {
@@ -280,9 +281,10 @@ export default function PlayGameClient({
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-lg font-bold" style={{ color: colors.green }}>
-            Score: {score}
-          </span>
+          <div className="score-readout">
+            <span className="score-label">SCORE</span>
+            <span className="score-digits">{String(score).padStart(5, "0")}</span>
+          </div>
           <span className="flex gap-1.5">
             {Array.from({ length: LIVES }, (_, i) => (
               <LifeIcon key={i} lost={i >= lives} />
@@ -299,10 +301,7 @@ export default function PlayGameClient({
           </div>
         )}
 
-        <div
-          className="rounded-xl border-2 p-5"
-          style={{ background: colors.panel, borderColor: colors.panelEdge }}
-        >
+        <div className="arcade-bezel rounded-xl p-5">
           <p className="mb-4 text-sm" style={{ color: colors.muted }}>
             Q{index + 1}/{questions.length}
           </p>
@@ -392,7 +391,8 @@ export default function PlayGameClient({
           )}
         </div>
 
-        <div className="text-center">
+        <div className="flex items-center justify-center gap-1.5">
+          <JoystickIcon />
           <button
             onClick={quit}
             className="text-xs underline"
