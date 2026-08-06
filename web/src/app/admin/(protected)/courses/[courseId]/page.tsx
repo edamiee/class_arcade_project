@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BookIcon } from "@/components/dashboard-icons";
 import type { Course, Week } from "@/lib/types";
 import WeekListClient from "./week-list-client";
 import GenerateFromDocumentPanel from "./generate-from-document-panel";
@@ -45,7 +46,14 @@ export default async function CourseDetailPage({
         >
           ← Courses
         </Link>
-        <h2 className="text-2xl font-bold">{(course as Course).name}</h2>
+        <div className="flex items-center gap-3">
+          <span className="dc-icon">
+            <BookIcon />
+          </span>
+          <h2 className="brand-marquee text-2xl font-bold">
+            {(course as Course).name}
+          </h2>
+        </div>
       </div>
       <GenerateFromDocumentPanel courseId={courseId} />
       <WeekListClient

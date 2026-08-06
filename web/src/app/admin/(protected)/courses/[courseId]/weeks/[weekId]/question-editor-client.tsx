@@ -241,10 +241,7 @@ export default function QuestionEditorClient({
 
   return (
     <div className="space-y-6">
-      <form
-        onSubmit={generateWithAi}
-        className="space-y-3 rounded-lg border-2 border-slate-800 p-4"
-      >
+      <form onSubmit={generateWithAi} className="arcade-bezel space-y-3 p-4">
         <h3 className="font-semibold text-slate-100">Generate with AI</h3>
         <textarea
           value={aiTopic}
@@ -293,10 +290,7 @@ export default function QuestionEditorClient({
         )}
       </form>
 
-      <form
-        onSubmit={importBulk}
-        className="space-y-3 rounded-lg border-2 border-slate-800 p-4"
-      >
+      <form onSubmit={importBulk} className="arcade-bezel space-y-3 p-4">
         <h3 className="font-semibold text-slate-100">Bulk import</h3>
         <p className="text-xs text-slate-400">
           Paste rows copied from a spreadsheet (tab-separated) or comma-separated
@@ -339,7 +333,7 @@ export default function QuestionEditorClient({
 
       <div className="grid gap-6 lg:grid-cols-2">
       <div>
-        <ul className="divide-y divide-slate-800 rounded-lg border-2 border-slate-800">
+        <ul className="arcade-bezel divide-y divide-slate-800">
           {questions.map((q) => (
             <li
               key={q.id}
@@ -377,10 +371,7 @@ export default function QuestionEditorClient({
         </ul>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-3 rounded-lg border-2 border-slate-800 p-4"
-      >
+      <form onSubmit={handleSubmit} className="arcade-bezel space-y-3 p-4">
         <h3 className="font-semibold text-slate-100">
           {editingId ? "Edit question" : "New question"}
         </h3>

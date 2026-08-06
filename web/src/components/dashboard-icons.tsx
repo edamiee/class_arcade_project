@@ -56,3 +56,13 @@ export function ShieldIcon() {
     </IconBase>
   );
 }
+
+export function QuizIcon() {
+  return (
+    <IconBase>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.5 9a2.5 2.5 0 0 1 4.9.7c0 1.7-2.4 1.6-2.4 3.6" />
+      <circle cx="12" cy="16.3" r="0.1" fill="currentColor" stroke="currentColor" strokeWidth="1.5" />
+    </IconBase>
+  );
+}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import JoystickIcon from "@/components/joystick-icon";
 import type { Course, Week, Team } from "@/lib/types";
 import LaunchSessionClient from "./launch-session-client";
 
@@ -28,7 +29,10 @@ export default async function NewSessionPage() {
         >
           ← Dashboard
         </Link>
-        <h2 className="text-2xl font-bold">Launch a session</h2>
+        <div className="flex items-center gap-3">
+          <JoystickIcon />
+          <h2 className="brand-marquee text-2xl font-bold">Launch a session</h2>
+        </div>
       </div>
       <LaunchSessionClient
         courses={(courses ?? []) as Course[]}

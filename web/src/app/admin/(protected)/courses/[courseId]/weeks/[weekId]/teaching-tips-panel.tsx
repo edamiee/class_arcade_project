@@ -46,7 +46,7 @@ export default function TeachingTipsPanel({ weekId }: { weekId: string }) {
   }
 
   return (
-    <div className="space-y-3 rounded-lg border-2 border-slate-800 p-4">
+    <div className="arcade-bezel space-y-3 p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h3 className="font-semibold text-slate-100">Teaching tips</h3>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { QuizIcon } from "@/components/dashboard-icons";
 import type { Course, Week, Question } from "@/lib/types";
 import QuestionEditorClient from "./question-editor-client";
 import TeachingTipsPanel from "./teaching-tips-panel";
@@ -43,7 +44,14 @@ export default async function WeekDetailPage({
           >
             ← {(course as Course).name}
           </Link>
-          <h2 className="text-2xl font-bold">{(week as Week).label}</h2>
+          <div className="flex items-center gap-3">
+            <span className="dc-icon">
+              <QuizIcon />
+            </span>
+            <h2 className="brand-marquee text-2xl font-bold">
+              {(week as Week).label}
+            </h2>
+          </div>
         </div>
         <Link
           href={`/admin/courses/${courseId}/weeks/${weekId}/print`}

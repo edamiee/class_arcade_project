@@ -185,7 +185,7 @@ export default function WeekListClient({
         </button>
       </form>
 
-      <ul className="divide-y divide-slate-800 rounded-lg border-2 border-slate-800">
+      <ul className="arcade-bezel divide-y divide-slate-800">
         {weeks.map((w) => (
           <li key={w.id} className="flex flex-col gap-2 px-4 py-3">
             <div className="flex items-center justify-between gap-4">

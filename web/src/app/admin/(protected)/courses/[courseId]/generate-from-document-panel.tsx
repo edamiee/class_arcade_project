@@ -58,7 +58,7 @@ export default function GenerateFromDocumentPanel({
   }
 
   return (
-    <details className="rounded-lg border-2 border-slate-800 p-4">
+    <details className="arcade-bezel p-4">
       <summary className="cursor-pointer font-semibold text-slate-100">
         Generate weeks from a document
       </summary>

@@ -184,7 +184,7 @@ export default function LaunchSessionClient({
     const courseName = courses.find((c) => c.id === created.course_id)?.name;
     const weekLabel = weeks.find((w) => w.id === created.week_id)?.label;
     return (
-      <div className="max-w-md space-y-4 rounded-lg border-2 border-slate-800 p-6">
+      <div className="arcade-bezel max-w-md space-y-4 p-6">
         <p className="text-sm text-slate-400">
           {courseName} — {weekLabel} · {created.mode} mode ·{" "}
           {THEMES.find((t) => t.value === created.theme)?.label} ·{" "}
@@ -252,10 +252,7 @@ export default function LaunchSessionClient({
   }
 
   return (
-    <form
-      onSubmit={launch}
-      className="max-w-md space-y-4 rounded-lg border-2 border-slate-800 p-6"
-    >
+    <form onSubmit={launch} className="arcade-bezel max-w-md space-y-4 p-6">
       <div className="space-y-1">
         <label className="text-sm text-slate-300">Course</label>
         <select
