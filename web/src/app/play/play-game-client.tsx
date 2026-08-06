@@ -7,6 +7,7 @@ import { playCorrectSound, playLifeLostSound } from "@/lib/sound";
 import { MascotEnd } from "@/components/mascot";
 import LifeIcon from "@/components/life-icon";
 import JoystickIcon from "@/components/joystick-icon";
+import SoundToggleButton from "@/components/sound-toggle-button";
 import type { AttemptDetail, ExplanationMode, QuestionType } from "@/lib/types";
 
 export interface PreparedQuestion {
@@ -393,7 +394,8 @@ export default function PlayGameClient({
           )}
         </div>
 
-        <div className="flex items-center justify-center gap-1.5">
+        <div className="flex items-center justify-center gap-3">
+          <SoundToggleButton borderColor={colors.panelEdge} color={colors.muted} />
           <JoystickIcon />
           <button
             onClick={quit}

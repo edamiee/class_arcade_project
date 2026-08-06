@@ -4,11 +4,34 @@
 let audioCtx: AudioContext | null = null;
 let masterGain: GainNode | null = null;
 
+const MUTE_STORAGE_KEY = "arcade-muted";
+
+function readStoredMuted(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(MUTE_STORAGE_KEY) === "1";
+}
+
+let muted = readStoredMuted();
+
+export function isMuted() {
+  return muted;
+}
+
+export function setMuted(next: boolean) {
+  muted = next;
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(MUTE_STORAGE_KEY, next ? "1" : "0");
+  }
+  if (masterGain) {
+    masterGain.gain.value = next ? 0 : 0.5;
+  }
+}
+
 function getAudioCtx() {
   if (!audioCtx) {
     audioCtx = new AudioContext();
     masterGain = audioCtx.createGain();
-    masterGain.gain.value = 0.5;
+    masterGain.gain.value = muted ? 0 : 0.5;
     masterGain.connect(audioCtx.destination);
   }
   return audioCtx;
