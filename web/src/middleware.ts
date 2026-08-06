@@ -40,7 +40,11 @@ export async function middleware(request: NextRequest) {
   // very first request there's no cookie yet, only after client-side JS
   // parses the hash and syncs a session to cookies.
   const path = request.nextUrl.pathname;
-  const publicAdminPaths = ["/admin/login", "/admin/accept-invite"];
+  const publicAdminPaths = [
+    "/admin/login",
+    "/admin/accept-invite",
+    "/admin/reset-password",
+  ];
   if (!user && path.startsWith("/admin") && !publicAdminPaths.includes(path)) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";

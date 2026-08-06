@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { parseBulkQuestions } from "@/lib/parse-bulk-questions";
 import type { Question, QuestionType } from "@/lib/types";
 
 const EMPTY_FORM = {
@@ -34,6 +35,13 @@ export default function QuestionEditorClient({
     text: string;
   } | null>(null);
 
+  const [bulkText, setBulkText] = useState("");
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkStatus, setBulkStatus] = useState<{
+    kind: "ok" | "error";
+    text: string;
+  } | null>(null);
+
   async function generateWithAi(e: React.FormEvent) {
     e.preventDefault();
     const topic = aiTopic.trim();
@@ -62,6 +70,44 @@ export default function QuestionEditorClient({
     } finally {
       setAiBusy(false);
     }
+  }
+
+  async function importBulk(e: React.FormEvent) {
+    e.preventDefault();
+    const { questions: parsed, errors } = parseBulkQuestions(bulkText);
+
+    if (errors.length > 0) {
+      const preview = errors
+        .slice(0, 3)
+        .map((err) => `line ${err.line}: ${err.message}`)
+        .join("; ");
+      setBulkStatus({
+        kind: "error",
+        text: `${errors.length} row(s) had problems: ${preview}${
+          errors.length > 3 ? "…" : ""
+        }`,
+      });
+      return;
+    }
+    if (parsed.length === 0) {
+      setBulkStatus({ kind: "error", text: "Nothing to import — paste some rows first." });
+      return;
+    }
+
+    setBulkBusy(true);
+    const supabase = createClient();
+    const { data, error: insertError } = await supabase
+      .from("questions")
+      .insert(parsed.map((q) => ({ week_id: weekId, ...q })))
+      .select();
+    setBulkBusy(false);
+    if (insertError) {
+      setBulkStatus({ kind: "error", text: insertError.message });
+      return;
+    }
+    setQuestions((prev) => [...prev, ...(data as Question[])]);
+    setBulkStatus({ kind: "ok", text: `Imported ${data!.length} question(s).` });
+    setBulkText("");
   }
 
   function startNew() {
@@ -245,6 +291,50 @@ export default function QuestionEditorClient({
             {aiStatus.text}
           </p>
         )}
+      </form>
+
+      <form
+        onSubmit={importBulk}
+        className="space-y-3 rounded-lg border-2 border-slate-800 p-4"
+      >
+        <h3 className="font-semibold text-slate-100">Bulk import</h3>
+        <p className="text-xs text-slate-400">
+          Paste rows copied from a spreadsheet (tab-separated) or comma-separated
+          text. Each row:{" "}
+          <code className="text-slate-300">
+            type, prompt, correct #, explanation, choice 1, choice 2, …
+          </code>
+          . <code className="text-slate-300">type</code> is{" "}
+          <code className="text-slate-300">mc</code> or{" "}
+          <code className="text-slate-300">tf</code>; correct # is 1-based. For{" "}
+          <code className="text-slate-300">tf</code> rows you can leave the choices
+          off (defaults to True/False).
+        </p>
+        <textarea
+          value={bulkText}
+          onChange={(e) => setBulkText(e.target.value)}
+          placeholder={
+            "mc, What is 2+2?, 2, Basic addition, 3, 4, 5, 6\ntf, The sky is blue., 1, "
+          }
+          rows={5}
+          className="w-full rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100 outline-none focus:border-indigo-500"
+        />
+        {bulkStatus && (
+          <p
+            className={
+              bulkStatus.kind === "error" ? "text-sm text-red-400" : "text-sm text-emerald-400"
+            }
+          >
+            {bulkStatus.text}
+          </p>
+        )}
+        <button
+          type="submit"
+          disabled={bulkBusy}
+          className="rounded-md bg-indigo-600 px-4 py-1.5 font-semibold text-[var(--bg)] transition hover:bg-indigo-500 disabled:opacity-50"
+        >
+          {bulkBusy ? "Importing…" : "Import rows"}
+        </button>
       </form>
 
       <div className="grid gap-6 lg:grid-cols-2">

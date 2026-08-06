@@ -11,6 +11,11 @@ const pixelFont = Press_Start_2P({
 export const metadata: Metadata = {
   title: "Penelope's Learning Arcade",
   description: "Classroom quiz arcade",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Arcade",
+  },
 };
 
 export const viewport: Viewport = {
