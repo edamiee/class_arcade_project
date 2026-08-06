@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Press_Start_2P } from "next/font/google";
 import "./globals.css";
 
@@ -11,6 +11,10 @@ const pixelFont = Press_Start_2P({
 export const metadata: Metadata = {
   title: "Penelope's Learning Arcade",
   description: "Classroom quiz arcade",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#060613",
 };
 
 export default function RootLayout({

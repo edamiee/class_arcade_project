@@ -7,12 +7,15 @@ import type { Student } from "@/lib/types";
 export default function StudentsListClient({
   initialStudents,
   attemptCounts,
+  classNames,
 }: {
   initialStudents: Student[];
   attemptCounts: Record<string, number>;
+  classNames: Record<string, string[]>;
 }) {
   const [students, setStudents] = useState(initialStudents);
   const [counts, setCounts] = useState(attemptCounts);
+  const [classes, setClasses] = useState(classNames);
   const [mergingId, setMergingId] = useState<string | null>(null);
   const [mergeTargetId, setMergeTargetId] = useState("");
   const [busy, setBusy] = useState(false);
@@ -97,6 +100,12 @@ export default function StudentsListClient({
       ...prev,
       [target.id]: (prev[target.id] ?? 0) + (prev[source.id] ?? 0),
     }));
+    setClasses((prev) => ({
+      ...prev,
+      [target.id]: Array.from(
+        new Set([...(prev[target.id] ?? []), ...(prev[source.id] ?? [])])
+      ).sort(),
+    }));
     setStudents((prev) => prev.filter((s) => s.id !== source.id));
     setMergingId(null);
   }
@@ -112,6 +121,9 @@ export default function StudentsListClient({
                 {counts[s.id] ?? 0} attempt(s) · joined{" "}
                 {new Date(s.created_at).toLocaleDateString()}
               </span>
+              <p className="text-xs text-slate-500">
+                {classes[s.id]?.length ? classes[s.id].join(", ") : "No classes yet"}
+              </p>
             </div>
             <div className="flex gap-2">
               <button
