@@ -188,10 +188,10 @@ export default function WeekListClient({
       <ul className="arcade-bezel divide-y divide-slate-800">
         {weeks.map((w) => (
           <li key={w.id} className="flex flex-col gap-2 px-4 py-3">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <Link
                 href={`/admin/courses/${courseId}/weeks/${w.id}`}
-                className="flex-1 text-slate-100 hover:text-indigo-400"
+                className="text-slate-100 hover:text-indigo-400 sm:flex-1"
               >
                 {w.label}
                 <span className="ml-2 text-xs text-slate-500">

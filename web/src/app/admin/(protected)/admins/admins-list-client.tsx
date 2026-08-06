@@ -97,8 +97,8 @@ export default function AdminsListClient({
           const isLast = admins.length <= 1;
           return (
             <li key={a.id} className="flex items-center justify-between gap-4 px-4 py-3">
-              <div>
-                <span className="text-slate-100">{a.email}</span>
+              <div className="min-w-0">
+                <span className="break-all text-slate-100">{a.email}</span>
                 {isSelf && <span className="ml-2 text-xs text-slate-500">(you)</span>}
                 <p className="text-xs text-slate-500">
                   {a.lastSignInAt

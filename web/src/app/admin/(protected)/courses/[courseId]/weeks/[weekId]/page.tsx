@@ -44,8 +44,8 @@ export default async function WeekDetailPage({
           >
             ← {(course as Course).name}
           </Link>
-          <div className="flex items-center gap-3">
-            <span className="dc-icon">
+          <div className="flex items-start gap-3">
+            <span className="dc-icon mt-1">
               <QuizIcon />
             </span>
             <h2 className="brand-marquee text-2xl font-bold">

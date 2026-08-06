@@ -95,52 +95,59 @@ export default function SessionsListClient({
 
       <ul className="arcade-bezel divide-y divide-slate-800">
         {rows.map((s) => (
-          <li key={s.id} className="flex items-center gap-3 px-4 py-3">
-            <input
-              type="checkbox"
-              checked={selected.has(s.id)}
-              onChange={() => toggle(s.id)}
-              className="accent-indigo-600"
-            />
-            <Link
-              href={`/admin/sessions/${s.id}`}
-              className="flex flex-1 items-center justify-between gap-4 hover:text-indigo-400"
-            >
-              <div>
-                <p className="text-slate-100">
-                  {s.courseName} — {s.weekLabel}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {THEME_LABELS[s.theme] ?? s.theme} · {s.mode} mode · code{" "}
-                  {s.code} · {new Date(s.createdAt).toLocaleString()}
-                </p>
-              </div>
-              <div className="flex items-center gap-3 text-xs text-slate-400">
-                <span>{s.attemptCount} attempt(s)</span>
-                <span
-                  className={`rounded px-2 py-0.5 ${
-                    s.isOpen
-                      ? "bg-emerald-950 text-emerald-400"
-                      : "bg-slate-800 text-slate-400"
-                  }`}
-                >
-                  {s.isOpen ? "OPEN" : "ENDED"}
-                </span>
-              </div>
-            </Link>
-            <Link
-              href={`/admin/sessions/${s.id}/live`}
-              className="shrink-0 rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
-            >
-              Live
-            </Link>
-            <button
-              onClick={() => deleteIds([s.id])}
-              disabled={busy}
-              className="shrink-0 rounded-md border-2 border-red-900 px-2 py-1 text-xs text-red-400 hover:border-red-600 disabled:opacity-40"
-            >
-              Delete
-            </button>
+          <li
+            key={s.id}
+            className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center"
+          >
+            <div className="flex items-start gap-3 sm:flex-1 sm:items-center">
+              <input
+                type="checkbox"
+                checked={selected.has(s.id)}
+                onChange={() => toggle(s.id)}
+                className="mt-1 accent-indigo-600 sm:mt-0"
+              />
+              <Link
+                href={`/admin/sessions/${s.id}`}
+                className="flex flex-1 flex-col gap-1 hover:text-indigo-400 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+              >
+                <div>
+                  <p className="text-slate-100">
+                    {s.courseName} — {s.weekLabel}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {THEME_LABELS[s.theme] ?? s.theme} · {s.mode} mode · code{" "}
+                    {s.code} · {new Date(s.createdAt).toLocaleString()}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-slate-400">
+                  <span>{s.attemptCount} attempt(s)</span>
+                  <span
+                    className={`rounded px-2 py-0.5 ${
+                      s.isOpen
+                        ? "bg-emerald-950 text-emerald-400"
+                        : "bg-slate-800 text-slate-400"
+                    }`}
+                  >
+                    {s.isOpen ? "OPEN" : "ENDED"}
+                  </span>
+                </div>
+              </Link>
+            </div>
+            <div className="flex shrink-0 gap-2 pl-7 sm:pl-0">
+              <Link
+                href={`/admin/sessions/${s.id}/live`}
+                className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
+              >
+                Live
+              </Link>
+              <button
+                onClick={() => deleteIds([s.id])}
+                disabled={busy}
+                className="rounded-md border-2 border-red-900 px-2 py-1 text-xs text-red-400 hover:border-red-600 disabled:opacity-40"
+              >
+                Delete
+              </button>
+            </div>
           </li>
         ))}
         {rows.length === 0 && (

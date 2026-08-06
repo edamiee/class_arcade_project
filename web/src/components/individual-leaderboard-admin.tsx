@@ -59,7 +59,7 @@ export default function IndividualLeaderboardAdmin({
             key={r.studentId}
             className={`px-4 py-3 ${i === 0 ? "winner-badge" : ""}`}
           >
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
               <span className="flex items-center gap-2">
                 <span className={i === 0 ? "text-xs" : "text-xs text-slate-500"}>
                   #{i + 1}

@@ -44,7 +44,7 @@ export default function SessionResultsView({
             {teams.map((t, i) => (
               <li
                 key={t.teamId}
-                className={`flex items-center justify-between px-4 py-3 ${
+                className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3 ${
                   t.teamId === topTeamId ? "winner-badge" : ""
                 }`}
               >
@@ -108,7 +108,7 @@ export default function SessionResultsView({
             {individual.map((r, i) => (
               <li
                 key={r.studentId}
-                className={`flex items-center justify-between px-4 py-3 ${
+                className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3 ${
                   i === 0 ? "winner-badge" : ""
                 }`}
               >

@@ -186,7 +186,7 @@ export default function StudentsListClient({
               onChange={() => toggleSelected(s.id)}
               className="accent-indigo-600"
             />
-            <div className="flex flex-1 items-center justify-between gap-4">
+            <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div>
                 <span className="text-slate-100">{s.name}</span>
                 <span className="ml-2 text-xs text-slate-500">

@@ -20,7 +20,7 @@ export default async function AdminSessionDetailPage({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <Link
             href="/admin"
@@ -35,7 +35,7 @@ export default async function AdminSessionDetailPage({
             <h2 className="brand-marquee text-2xl font-bold">Session results</h2>
           </div>
         </div>
-        <div className="flex shrink-0 gap-2">
+        <div className="flex flex-wrap gap-2 sm:shrink-0">
           <a
             href={`/admin/sessions/${sessionId}/present`}
             target="_blank"
