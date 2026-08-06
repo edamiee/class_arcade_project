@@ -207,10 +207,22 @@ export default function LaunchSessionClient({
           they&apos;ll enter the code at{" "}
           <span className="text-slate-200">/join</span>.
         </p>
+        <a
+          href={`/admin/sessions/${created.id}/present`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block rounded-md bg-indigo-600 px-4 py-2 text-center font-semibold text-[var(--bg)] transition hover:bg-indigo-500"
+        >
+          Present for class →
+        </a>
+        <p className="text-xs text-slate-500">
+          Opens a clean full-screen code, safe to project — no admin
+          buttons. Keep this tab to yourself for the links below.
+        </p>
         <div className="flex flex-wrap gap-2">
           <Link
             href={`/admin/sessions/${created.id}/live`}
-            className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500"
+            className="rounded-md border-2 border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
           >
             Watch live
           </Link>

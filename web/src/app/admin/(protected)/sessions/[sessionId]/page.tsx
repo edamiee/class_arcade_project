@@ -30,6 +30,14 @@ export default async function AdminSessionDetailPage({
           <h2 className="text-2xl font-bold">Session results</h2>
         </div>
         <div className="flex shrink-0 gap-2">
+          <a
+            href={`/admin/sessions/${sessionId}/present`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-md border-2 border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:border-slate-500"
+          >
+            Present for class
+          </a>
           <Link
             href={`/admin/sessions/${sessionId}/live`}
             className="rounded-md border-2 border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:border-slate-500"
