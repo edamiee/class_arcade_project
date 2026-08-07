@@ -337,13 +337,13 @@ export default function QuestionEditorClient({
           {questions.map((q) => (
             <li
               key={q.id}
-              className="flex items-start justify-between gap-3 px-4 py-3"
+              className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-start sm:justify-between sm:gap-3"
             >
               <div className="min-w-0">
                 <span className="rounded bg-slate-800 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">
                   {q.type.toUpperCase()}
                 </span>
-                <p className="mt-1 truncate text-sm text-slate-200">
+                <p className="mt-1 text-sm text-slate-200 sm:truncate">
                   {q.prompt}
                 </p>
               </div>
