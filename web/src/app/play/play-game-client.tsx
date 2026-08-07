@@ -31,6 +31,7 @@ export default function PlayGameClient({
   pacing,
   initialIndex,
   initialQuestionStartedAt,
+  isPractice,
 }: {
   studentName: string;
   teamName: string | null;
@@ -44,6 +45,7 @@ export default function PlayGameClient({
   pacing: SessionPacing;
   initialIndex: number;
   initialQuestionStartedAt: string | null;
+  isPractice: boolean;
 }) {
   const router = useRouter();
   const colors = useMemo(() => themeColors(theme), [theme]);
@@ -338,6 +340,15 @@ export default function PlayGameClient({
                 >
                   View results
                 </a>
+                {isPractice && pacing === "self" && (
+                  <a
+                    href="/play"
+                    className="block w-full rounded-md border-2 px-4 py-2 text-center font-semibold"
+                    style={{ borderColor: colors.panelEdge, color: colors.text }}
+                  >
+                    Play again
+                  </a>
+                )}
               </div>
             )}
             {submitState === "error" && (

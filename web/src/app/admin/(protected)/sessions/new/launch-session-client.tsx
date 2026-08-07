@@ -40,6 +40,18 @@ export default function LaunchSessionClient({
   const [theme, setTheme] = useState("pac");
   const [mode, setMode] = useState<SessionMode>("individual");
   const [pacing, setPacing] = useState<SessionPacing>("self");
+  const [isPractice, setIsPractice] = useState(false);
+
+  function togglePractice() {
+    setIsPractice((prev) => {
+      const next = !prev;
+      if (next) {
+        setMode("individual");
+        setPacing("self");
+      }
+      return next;
+    });
+  }
 
   const weekTotal = questionCounts[weekId] ?? 0;
   const [questionCount, setQuestionCount] = useState(weekTotal);
@@ -135,6 +147,7 @@ export default function LaunchSessionClient({
           theme,
           mode,
           pacing,
+          is_practice: isPractice,
           session_code: code,
           question_count: questionCount,
           timer_seconds: timerSeconds,
@@ -196,7 +209,8 @@ export default function LaunchSessionClient({
       <div className="arcade-bezel max-w-md space-y-4 p-6">
         <p className="text-sm text-slate-400">
           {courseName} — {weekLabel} · {created.mode} mode ·{" "}
-          {created.pacing === "presenter" ? "presenter-paced" : "self-paced"} ·{" "}
+          {created.pacing === "presenter" ? "presenter-paced" : "self-paced"}
+          {created.is_practice ? " · practice" : ""} ·{" "}
           {THEMES.find((t) => t.value === created.theme)?.label} ·{" "}
           {created.question_count ?? "all"} question
           {created.question_count === 1 ? "" : "s"}
@@ -365,7 +379,8 @@ export default function LaunchSessionClient({
           <button
             type="button"
             onClick={() => setMode("individual")}
-            className={`rounded-md px-3 py-1.5 text-sm ${
+            disabled={isPractice}
+            className={`rounded-md px-3 py-1.5 text-sm disabled:opacity-50 ${
               mode === "individual"
                 ? "bg-indigo-600 text-[var(--bg)]"
                 : "border-2 border-slate-700 text-slate-300"
@@ -376,7 +391,8 @@ export default function LaunchSessionClient({
           <button
             type="button"
             onClick={() => setMode("team")}
-            className={`rounded-md px-3 py-1.5 text-sm ${
+            disabled={isPractice}
+            className={`rounded-md px-3 py-1.5 text-sm disabled:opacity-50 ${
               mode === "team"
                 ? "bg-indigo-600 text-[var(--bg)]"
                 : "border-2 border-slate-700 text-slate-300"
@@ -393,7 +409,8 @@ export default function LaunchSessionClient({
           <button
             type="button"
             onClick={() => setPacing("self")}
-            className={`rounded-md px-3 py-1.5 text-sm ${
+            disabled={isPractice}
+            className={`rounded-md px-3 py-1.5 text-sm disabled:opacity-50 ${
               pacing === "self"
                 ? "bg-indigo-600 text-[var(--bg)]"
                 : "border-2 border-slate-700 text-slate-300"
@@ -404,7 +421,8 @@ export default function LaunchSessionClient({
           <button
             type="button"
             onClick={() => setPacing("presenter")}
-            className={`rounded-md px-3 py-1.5 text-sm ${
+            disabled={isPractice}
+            className={`rounded-md px-3 py-1.5 text-sm disabled:opacity-50 ${
               pacing === "presenter"
                 ? "bg-indigo-600 text-[var(--bg)]"
                 : "border-2 border-slate-700 text-slate-300"
@@ -417,6 +435,26 @@ export default function LaunchSessionClient({
           {pacing === "presenter"
             ? "Everyone stays on the same question — advance the class from \"Watch live\"."
             : "Each student answers at their own speed."}
+        </p>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-sm text-slate-300">Practice / homework</label>
+        <button
+          type="button"
+          onClick={togglePractice}
+          className={`rounded-md px-3 py-1.5 text-sm ${
+            isPractice
+              ? "bg-indigo-600 text-[var(--bg)]"
+              : "border-2 border-slate-700 text-slate-300"
+          }`}
+        >
+          {isPractice ? "Practice session — on" : "Make this a practice session"}
+        </button>
+        <p className="text-xs text-slate-500">
+          {isPractice
+            ? "Locked to individual, self-paced. Students get a \"Play again\" button to retry anytime — leave this open and share the code/link for review before a test."
+            : "A standing link students can revisit on their own time, not tied to a live class."}
         </p>
       </div>
 

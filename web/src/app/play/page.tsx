@@ -78,6 +78,7 @@ export default async function PlayPage() {
       pacing={typedSession.pacing}
       initialIndex={isPresenter ? typedSession.current_question_index : 0}
       initialQuestionStartedAt={typedSession.question_started_at}
+      isPractice={typedSession.is_practice}
     />
   );
 }

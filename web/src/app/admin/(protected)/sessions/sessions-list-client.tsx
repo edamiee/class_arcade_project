@@ -14,6 +14,7 @@ export interface SessionRow {
   createdAt: string;
   attemptCount: number;
   isOpen: boolean;
+  isPractice: boolean;
 }
 
 const THEME_LABELS: Record<string, string> = {
@@ -121,6 +122,11 @@ export default function SessionsListClient({
                 </div>
                 <div className="flex items-center gap-3 text-xs text-slate-400">
                   <span>{s.attemptCount} attempt(s)</span>
+                  {s.isPractice && (
+                    <span className="rounded bg-indigo-950 px-2 py-0.5 text-indigo-400">
+                      PRACTICE
+                    </span>
+                  )}
                   <span
                     className={`rounded px-2 py-0.5 ${
                       s.isOpen

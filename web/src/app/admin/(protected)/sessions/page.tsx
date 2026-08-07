@@ -37,6 +37,7 @@ export default async function SessionsHistoryPage() {
     createdAt: s.created_at,
     attemptCount: attemptCounts.get(s.id) ?? 0,
     isOpen: s.is_open && !isSessionExpired(s),
+    isPractice: s.is_practice,
   }));
 
   return (

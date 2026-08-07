@@ -66,6 +66,7 @@ export interface GameSession {
   question_order: PreparedQuestion[] | null;
   current_question_index: number;
   question_started_at: string | null;
+  is_practice: boolean;
   created_at: string;
 }
 
