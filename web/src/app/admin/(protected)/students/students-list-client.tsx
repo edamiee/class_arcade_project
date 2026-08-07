@@ -156,7 +156,7 @@ export default function StudentsListClient({
   return (
     <div className="space-y-2">
       {students.length > 0 && (
-        <div className="flex items-center gap-3 text-xs text-slate-400">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
           <label className="flex items-center gap-1.5">
             <input
               type="checkbox"

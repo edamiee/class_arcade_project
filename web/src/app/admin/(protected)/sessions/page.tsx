@@ -48,7 +48,7 @@ export default async function SessionsHistoryPage() {
         >
           ← Dashboard
         </Link>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <span className="dc-icon">
               <ClockIcon />
@@ -57,7 +57,7 @@ export default async function SessionsHistoryPage() {
           </div>
           <Link
             href="/admin/sessions/new"
-            className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500"
+            className="self-start rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500 sm:self-auto"
           >
             Launch a session
           </Link>
