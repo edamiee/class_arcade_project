@@ -56,7 +56,7 @@ export default async function WeekDetailPage({
         <Link
           href={`/admin/courses/${courseId}/weeks/${weekId}/print`}
           target="_blank"
-          className="shrink-0 rounded-md border-2 border-slate-700 px-3 py-2 text-sm text-slate-300 hover:border-slate-500"
+          className="link-btn shrink-0 rounded-md border-2 border-slate-700 px-3 py-2 text-sm text-slate-300 hover:border-slate-500"
         >
           Print Q&amp;A
         </Link>

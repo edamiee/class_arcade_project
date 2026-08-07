@@ -136,7 +136,7 @@ export default function SessionsListClient({
             <div className="flex shrink-0 gap-2 pl-7 sm:pl-0">
               <Link
                 href={`/admin/sessions/${s.id}/live`}
-                className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
+                className="link-btn rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
               >
                 Live
               </Link>

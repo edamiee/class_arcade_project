@@ -219,7 +219,7 @@ export default function LaunchSessionClient({
           href={`/admin/sessions/${created.id}/present`}
           target="_blank"
           rel="noopener noreferrer"
-          className="block rounded-md bg-indigo-600 px-4 py-2 text-center font-semibold text-[var(--bg)] transition hover:bg-indigo-500"
+          className="link-btn block rounded-md bg-indigo-600 px-4 py-2 text-center font-semibold text-[var(--bg)] transition hover:bg-indigo-500"
         >
           Present for class →
         </a>
@@ -230,13 +230,13 @@ export default function LaunchSessionClient({
         <div className="flex flex-wrap gap-2">
           <Link
             href={`/admin/sessions/${created.id}/live`}
-            className="rounded-md border-2 border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
+            className="link-btn rounded-md border-2 border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
           >
             Watch live
           </Link>
           <Link
             href={`/admin/sessions/${created.id}`}
-            className="rounded-md border-2 border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
+            className="link-btn rounded-md border-2 border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
           >
             View results
           </Link>

@@ -40,13 +40,13 @@ export default async function AdminSessionDetailPage({
             href={`/admin/sessions/${sessionId}/present`}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-md border-2 border-slate-700 px-3 py-1.5 text-sm text-slate-300 transition hover:border-[var(--cyan)]"
+            className="link-btn rounded-md border-2 border-slate-700 px-3 py-1.5 text-sm text-slate-300 transition hover:border-[var(--cyan)]"
           >
             Present for class
           </a>
           <Link
             href={`/admin/sessions/${sessionId}/live`}
-            className="rounded-md border-2 border-slate-700 px-3 py-1.5 text-sm text-slate-300 transition hover:border-[var(--cyan)]"
+            className="link-btn rounded-md border-2 border-slate-700 px-3 py-1.5 text-sm text-slate-300 transition hover:border-[var(--cyan)]"
           >
             Watch live
           </Link>
