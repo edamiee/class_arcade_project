@@ -175,6 +175,25 @@ button:active:not(:disabled) {
   box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.45);
 }
 
+/* Same pixel-button treatment as the `button` rules above, for links
+   styled to look like a button (e.g. "Launch a session") — the element
+   selectors above don't reach <a> tags. */
+.link-btn {
+  font-family: var(--font-pixel), "Courier New", monospace;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.45);
+}
+
+.link-btn:hover {
+  filter: brightness(1.12);
+}
+
+.link-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.45);
+}
+
 /* Panel-style containers (list wrappers, cards) get the same hard pixel
    drop-shadow as buttons, matching the original app's .panel style. Every
    card/list wrapper in this app uses rounded-lg or rounded-xl as its

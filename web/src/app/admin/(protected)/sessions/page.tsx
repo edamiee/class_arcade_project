@@ -57,7 +57,7 @@ export default async function SessionsHistoryPage() {
           </div>
           <Link
             href="/admin/sessions/new"
-            className="self-start rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500 sm:self-auto"
+            className="link-btn self-start rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500 sm:self-auto"
           >
             Launch a session
           </Link>
