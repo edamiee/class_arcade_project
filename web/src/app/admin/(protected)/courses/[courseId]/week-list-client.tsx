@@ -198,7 +198,7 @@ export default function WeekListClient({
                   {questionCounts[w.id] ?? 0} question(s)
                 </span>
               </Link>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => renameWeek(w)}
                   className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"

@@ -197,7 +197,7 @@ export default function StudentsListClient({
                   {classes[s.id]?.length ? classes[s.id].join(", ") : "No classes yet"}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => renameStudent(s)}
                   className="rounded-md border-2 border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-slate-500"
