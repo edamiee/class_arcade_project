@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Course, GameSession, Week } from "@/lib/types";
 import LiveFeedClient from "./live-feed-client";
+import PresenterControlClient from "./presenter-control-client";
 
 const THEME_LABELS: Record<string, string> = {
   pac: "PAC",
@@ -55,6 +56,15 @@ export default async function LiveSessionPage({
           {typedSession.mode} mode · code {typedSession.session_code}
         </p>
       </div>
+      {typedSession.pacing === "presenter" && (
+        <PresenterControlClient
+          sessionId={sessionId}
+          weekId={typedSession.week_id}
+          questionCount={typedSession.question_count}
+          initialCurrentQuestionIndex={typedSession.current_question_index}
+          initialQuestionOrder={typedSession.question_order}
+        />
+      )}
       <LiveFeedClient sessionId={sessionId} theme={typedSession.theme} />
     </div>
   );

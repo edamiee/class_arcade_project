@@ -35,6 +35,21 @@ export interface Team {
 }
 
 export type SessionMode = "individual" | "team";
+export type SessionPacing = "self" | "presenter";
+
+// Fully prepared question as served to a student's /play screen: choices
+// already shuffled, correctIndex remapped to match. For presenter-paced
+// sessions this exact shape is persisted (sessions.question_order) so
+// every student, and the projected /present screen, see the identical
+// question AND choice order at the identical moment.
+export interface PreparedQuestion {
+  id: string;
+  type: QuestionType;
+  prompt: string;
+  choices: string[];
+  correctIndex: number;
+  explanation: string;
+}
 
 export interface GameSession {
   id: string;
@@ -47,6 +62,10 @@ export interface GameSession {
   question_count: number | null;
   timer_seconds: number;
   auto_close_at: string | null;
+  pacing: SessionPacing;
+  question_order: PreparedQuestion[] | null;
+  current_question_index: number;
+  question_started_at: string | null;
   created_at: string;
 }
 

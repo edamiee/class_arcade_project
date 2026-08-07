@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { themeColors } from "@/lib/theme-colors";
 import { playCorrectSound, playLifeLostSound } from "@/lib/sound";
@@ -8,18 +8,15 @@ import { MascotEnd } from "@/components/mascot";
 import LifeIcon from "@/components/life-icon";
 import JoystickIcon from "@/components/joystick-icon";
 import SoundToggleButton from "@/components/sound-toggle-button";
-import type { AttemptDetail, ExplanationMode, QuestionType } from "@/lib/types";
-
-export interface PreparedQuestion {
-  id: string;
-  type: QuestionType;
-  prompt: string;
-  choices: string[];
-  correctIndex: number;
-  explanation: string;
-}
+import type {
+  AttemptDetail,
+  ExplanationMode,
+  PreparedQuestion,
+  SessionPacing,
+} from "@/lib/types";
 
 const LIVES = 3;
+const PRESENTER_POLL_MS = 1500;
 
 export default function PlayGameClient({
   studentName,
@@ -30,7 +27,10 @@ export default function PlayGameClient({
   explanationMode,
   sessionCode,
   timerSeconds,
-  questions,
+  questions: initialQuestions,
+  pacing,
+  initialIndex,
+  initialQuestionStartedAt,
 }: {
   studentName: string;
   teamName: string | null;
@@ -41,11 +41,16 @@ export default function PlayGameClient({
   sessionCode: string;
   timerSeconds: number;
   questions: PreparedQuestion[];
+  pacing: SessionPacing;
+  initialIndex: number;
+  initialQuestionStartedAt: string | null;
 }) {
   const router = useRouter();
   const colors = useMemo(() => themeColors(theme), [theme]);
+  const isPresenter = pacing === "presenter";
 
-  const [index, setIndex] = useState(0);
+  const [questions, setQuestions] = useState(initialQuestions);
+  const [index, setIndex] = useState(initialIndex);
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(LIVES);
   const [streak, setStreak] = useState(0);
@@ -54,14 +59,74 @@ export default function PlayGameClient({
   const [chosenIndex, setChosenIndex] = useState<number | null>(null);
   const [log, setLog] = useState<AttemptDetail[]>([]);
   const [timerRemaining, setTimerRemaining] = useState(timerSeconds);
+  const [questionStartedAt, setQuestionStartedAt] = useState(
+    initialQuestionStartedAt
+  );
+  const [sessionEnded, setSessionEnded] = useState(false);
 
   const [submitState, setSubmitState] = useState<
     "idle" | "submitting" | "done" | "error"
   >("idle");
 
-  const finished = index >= questions.length || gameOver;
-  const q = !finished ? questions[index] : null;
+  const indexRef = useRef(index);
+  useEffect(() => {
+    indexRef.current = index;
+  }, [index]);
+
+  const lobby = isPresenter && index < 0;
+  const finished = !lobby && (index >= questions.length || gameOver || sessionEnded);
+  const q = !lobby && !finished ? questions[index] : null;
   const isSuper = streak >= 3;
+
+  function goToQuestion(newIndex: number) {
+    setAnswered(false);
+    setChosenIndex(null);
+    setIndex(newIndex);
+  }
+
+  // Presenter-paced only: the teacher's "Next question" click on /live is
+  // the sole source of truth for advancing — this poll just finds out
+  // about it. Always syncs directly to the server's index (never
+  // increments locally) so a missed tick can't cause permanent drift.
+  useEffect(() => {
+    if (!isPresenter) return;
+    let cancelled = false;
+
+    async function poll() {
+      try {
+        const res = await fetch("/api/play/session-status");
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (cancelled) return;
+
+        if (Array.isArray(data.questionOrder) && data.questionOrder.length > 0) {
+          setQuestions(data.questionOrder);
+        }
+        setQuestionStartedAt(data.questionStartedAt ?? null);
+
+        if (!data.isOpen) {
+          setSessionEnded(true);
+          return;
+        }
+        if (
+          typeof data.currentQuestionIndex === "number" &&
+          data.currentQuestionIndex !== indexRef.current
+        ) {
+          goToQuestion(data.currentQuestionIndex);
+        }
+      } catch {
+        // Transient network error — the next poll tick retries.
+      }
+    }
+
+    poll();
+    const interval = setInterval(poll, PRESENTER_POLL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPresenter]);
 
   function recordAnswer(i: number | null) {
     if (!q || answered) return;
@@ -115,11 +180,19 @@ export default function PlayGameClient({
   // Per-question countdown. Restarts on every new question and stops as
   // soon as the question is answered (manually or by timing out) — keyed
   // on `answered` too so the interval from a question the player already
-  // answered can never fire a stale expiry against the next question.
+  // answered can never fire a stale expiry against the next question. In
+  // presenter mode the countdown is anchored to the shared
+  // `questionStartedAt` timestamp instead of this browser's own clock, so
+  // a laggy poll can't desync one student's timer from the rest of the
+  // class — expiry still only records *this* student's no-answer, it
+  // never advances the class (that's the teacher's action alone).
   useEffect(() => {
     if (!q || timerSeconds <= 0 || answered) return;
-    setTimerRemaining(timerSeconds);
-    const start = Date.now();
+    const start =
+      isPresenter && questionStartedAt
+        ? new Date(questionStartedAt).getTime()
+        : Date.now();
+    setTimerRemaining(Math.max(0, timerSeconds - (Date.now() - start) / 1000));
     const interval = setInterval(() => {
       const remaining = timerSeconds - (Date.now() - start) / 1000;
       if (remaining <= 0) {
@@ -132,12 +205,10 @@ export default function PlayGameClient({
     }, 100);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, timerSeconds, answered]);
+  }, [index, timerSeconds, answered, questionStartedAt]);
 
   function nextQuestion() {
-    setAnswered(false);
-    setChosenIndex(null);
-    setIndex((i) => i + 1);
+    goToQuestion(index + 1);
   }
 
   function quit() {
@@ -171,6 +242,28 @@ export default function PlayGameClient({
     color: colors.text,
     minHeight: "100vh",
   };
+
+  if (lobby) {
+    return (
+      <div style={containerStyle} data-theme={theme} className="px-4 py-8">
+        <div className="arcade-bezel mx-auto max-w-md space-y-4 rounded-xl p-6 text-center">
+          <h1 className="text-2xl font-black" style={{ color: colors.yellow }}>
+            GET READY
+          </h1>
+          <div className="flex justify-center">
+            <MascotEnd />
+          </div>
+          <p className="text-sm" style={{ color: colors.muted }}>
+            Waiting for your teacher to start the round…
+          </p>
+          <p className="text-xs" style={{ color: colors.muted }}>
+            {studentName}
+            {teamName ? ` · ${teamName}` : ""} — {courseName} — {weekLabel}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (finished) {
     const correctCount = log.filter((d) => d.correct).length;
@@ -383,7 +476,16 @@ export default function PlayGameClient({
             </div>
           )}
 
-          {answered && (
+          {answered && isPresenter && (
+            <p
+              className="mt-4 text-center text-sm"
+              style={{ color: colors.muted }}
+            >
+              Waiting for the rest of the class…
+            </p>
+          )}
+
+          {answered && !isPresenter && (
             <button
               onClick={nextQuestion}
               className="mt-4 w-full rounded-md px-4 py-2 font-semibold text-black"

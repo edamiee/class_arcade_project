@@ -5,7 +5,14 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { generateSessionCode } from "@/lib/session-code";
 import JoinQrCode from "@/components/join-qr-code";
-import type { Course, Week, Team, GameSession, SessionMode } from "@/lib/types";
+import type {
+  Course,
+  Week,
+  Team,
+  GameSession,
+  SessionMode,
+  SessionPacing,
+} from "@/lib/types";
 
 const THEMES: { value: string; label: string }[] = [
   { value: "pac", label: "PAC" },
@@ -32,6 +39,7 @@ export default function LaunchSessionClient({
   const [weekId, setWeekId] = useState(weeksForCourse[0]?.id ?? "");
   const [theme, setTheme] = useState("pac");
   const [mode, setMode] = useState<SessionMode>("individual");
+  const [pacing, setPacing] = useState<SessionPacing>("self");
 
   const weekTotal = questionCounts[weekId] ?? 0;
   const [questionCount, setQuestionCount] = useState(weekTotal);
@@ -126,6 +134,7 @@ export default function LaunchSessionClient({
           week_id: weekId,
           theme,
           mode,
+          pacing,
           session_code: code,
           question_count: questionCount,
           timer_seconds: timerSeconds,
@@ -187,6 +196,7 @@ export default function LaunchSessionClient({
       <div className="arcade-bezel max-w-md space-y-4 p-6">
         <p className="text-sm text-slate-400">
           {courseName} — {weekLabel} · {created.mode} mode ·{" "}
+          {created.pacing === "presenter" ? "presenter-paced" : "self-paced"} ·{" "}
           {THEMES.find((t) => t.value === created.theme)?.label} ·{" "}
           {created.question_count ?? "all"} question
           {created.question_count === 1 ? "" : "s"}
@@ -232,7 +242,7 @@ export default function LaunchSessionClient({
             href={`/admin/sessions/${created.id}/live`}
             className="link-btn rounded-md border-2 border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
           >
-            Watch live
+            {created.pacing === "presenter" ? "Watch live & start round" : "Watch live"}
           </Link>
           <Link
             href={`/admin/sessions/${created.id}`}
@@ -375,6 +385,39 @@ export default function LaunchSessionClient({
             Team
           </button>
         </div>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-sm text-slate-300">Pacing</label>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setPacing("self")}
+            className={`rounded-md px-3 py-1.5 text-sm ${
+              pacing === "self"
+                ? "bg-indigo-600 text-[var(--bg)]"
+                : "border-2 border-slate-700 text-slate-300"
+            }`}
+          >
+            Self-paced
+          </button>
+          <button
+            type="button"
+            onClick={() => setPacing("presenter")}
+            className={`rounded-md px-3 py-1.5 text-sm ${
+              pacing === "presenter"
+                ? "bg-indigo-600 text-[var(--bg)]"
+                : "border-2 border-slate-700 text-slate-300"
+            }`}
+          >
+            Presenter-paced
+          </button>
+        </div>
+        <p className="text-xs text-slate-500">
+          {pacing === "presenter"
+            ? "Everyone stays on the same question — advance the class from \"Watch live\"."
+            : "Each student answers at their own speed."}
+        </p>
       </div>
 
       {mode === "team" && (

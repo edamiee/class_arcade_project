@@ -6,30 +6,9 @@ import {
   verifyStudentSessionToken,
 } from "@/lib/student-session";
 import { resolveSessionOpen } from "@/lib/session-lifecycle";
+import { buildQuestionPlan } from "@/lib/question-order";
 import type { GameSession, Question, Week } from "@/lib/types";
-import PlayGameClient, { type PreparedQuestion } from "./play-game-client";
-
-function shuffle<T>(arr: T[]): T[] {
-  const out = arr.slice();
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
-
-function shuffleChoices(q: Question): PreparedQuestion {
-  const indices = q.choices.map((_, i) => i);
-  const shuffled = shuffle(indices);
-  return {
-    id: q.id,
-    type: q.type,
-    prompt: q.prompt,
-    choices: shuffled.map((i) => q.choices[i]),
-    correctIndex: shuffled.indexOf(q.correct_index),
-    explanation: q.explanation,
-  };
-}
+import PlayGameClient from "./play-game-client";
 
 export default async function PlayPage() {
   const cookieStore = await cookies();
@@ -76,11 +55,14 @@ export default async function PlayPage() {
     redirect("/join");
   }
 
-  const orderedPool = typedWeek?.random_order !== false ? shuffle(pool) : pool;
-  const sliced = typedSession.question_count
-    ? orderedPool.slice(0, typedSession.question_count)
-    : orderedPool;
-  const preparedQuestions = sliced.map(shuffleChoices);
+  const isPresenter = typedSession.pacing === "presenter";
+  const preparedQuestions = isPresenter
+    ? typedSession.question_order ?? []
+    : buildQuestionPlan(
+        pool,
+        { random_order: typedWeek?.random_order !== false },
+        typedSession.question_count
+      );
 
   return (
     <PlayGameClient
@@ -93,6 +75,9 @@ export default async function PlayPage() {
       sessionCode={typedSession.session_code}
       timerSeconds={typedSession.timer_seconds}
       questions={preparedQuestions}
+      pacing={typedSession.pacing}
+      initialIndex={isPresenter ? typedSession.current_question_index : 0}
+      initialQuestionStartedAt={typedSession.question_started_at}
     />
   );
 }
