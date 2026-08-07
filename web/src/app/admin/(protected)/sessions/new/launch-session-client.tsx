@@ -331,7 +331,7 @@ export default function LaunchSessionClient({
 
       <div className="space-y-1">
         <label className="text-sm text-slate-300">Theme</label>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {THEMES.map((t) => (
             <button
               key={t.value}
@@ -351,7 +351,7 @@ export default function LaunchSessionClient({
 
       <div className="space-y-1">
         <label className="text-sm text-slate-300">Mode</label>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => setMode("individual")}
