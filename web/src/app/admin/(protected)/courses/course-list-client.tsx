@@ -75,17 +75,17 @@ export default function CourseListClient({
 
   return (
     <div className="space-y-4">
-      <form onSubmit={addCourse} className="flex gap-2">
+      <form onSubmit={addCourse} className="flex flex-col gap-2 sm:flex-row">
         <input
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="New course name"
-          className="flex-1 rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500"
+          className="min-w-0 rounded-md border-2 border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-indigo-500 sm:flex-1"
         />
         <button
           type="submit"
           disabled={busy}
-          className="rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500 disabled:opacity-50"
+          className="shrink-0 rounded-md bg-indigo-600 px-4 py-2 font-semibold text-[var(--bg)] transition hover:bg-indigo-500 disabled:opacity-50"
         >
           Add course
         </button>

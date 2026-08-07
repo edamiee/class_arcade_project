@@ -47,7 +47,7 @@ export default function TeachingTipsPanel({ weekId }: { weekId: string }) {
 
   return (
     <div className="arcade-bezel space-y-3 p-4">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="font-semibold text-slate-100">Teaching tips</h3>
           <p className="text-xs text-slate-500">
