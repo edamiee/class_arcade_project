@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Course, GameSession, Week } from "@/lib/types";
+import { ClockIcon } from "@/components/dashboard-icons";
 import LiveFeedClient from "./live-feed-client";
 import PresenterControlClient from "./presenter-control-client";
 
@@ -49,7 +50,12 @@ export default async function LiveSessionPage({
         >
           ← Session results
         </Link>
-        <h2 className="text-2xl font-bold">Live: watching answers come in</h2>
+        <div className="flex items-center gap-3">
+          <span className="dc-icon">
+            <ClockIcon />
+          </span>
+          <h2 className="brand-marquee text-2xl font-bold">Live</h2>
+        </div>
         <p className="text-sm text-slate-400">
           {(course as Course | null)?.name} — {(week as Week | null)?.label} ·{" "}
           {THEME_LABELS[typedSession.theme] ?? typedSession.theme} ·{" "}
