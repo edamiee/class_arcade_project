@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getWeekMissSummary } from "@/lib/miss-analysis";
 import { QuizIcon } from "@/components/dashboard-icons";
 import type { Course, Week, Question } from "@/lib/types";
 import QuestionEditorClient from "./question-editor-client";
 import TeachingTipsPanel from "./teaching-tips-panel";
+import MissedQuestionsPanel from "@/components/missed-questions-panel";
 
 export default async function WeekDetailPage({
   params,
@@ -34,6 +36,8 @@ export default async function WeekDetailPage({
     .eq("week_id", weekId)
     .order("created_at", { ascending: true });
 
+  const missSummary = await getWeekMissSummary(weekId);
+
   return (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-4">
@@ -62,6 +66,14 @@ export default async function WeekDetailPage({
         </Link>
       </div>
       <TeachingTipsPanel weekId={weekId} />
+
+      <div>
+        <h3 className="mb-2 text-lg font-bold" style={{ color: "var(--cyan)" }}>
+          Missed questions
+        </h3>
+        <MissedQuestionsPanel summary={missSummary} />
+      </div>
+
       <QuestionEditorClient
         weekId={weekId}
         initialQuestions={(questions ?? []) as Question[]}
