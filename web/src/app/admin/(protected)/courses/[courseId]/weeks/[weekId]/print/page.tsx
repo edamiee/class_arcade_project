@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Course, Week, Question } from "@/lib/types";
-import PrintButton from "./print-button";
+import PrintButton from "@/components/print-button";
 
 // Deliberately NOT the dark arcade theme — this is a worksheet/answer-key
 // meant to actually be printed, so it uses plain black-on-white styling

@@ -264,6 +264,16 @@ export default function LaunchSessionClient({
           >
             View results
           </Link>
+          {created.is_practice && (
+            <a
+              href={`/admin/sessions/${created.id}/flyer`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link-btn rounded-md border-2 border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"
+            >
+              Print flyer
+            </a>
+          )}
           <button
             onClick={launchAnother}
             className="rounded-md border-2 border-slate-700 px-4 py-2 text-slate-300 hover:border-slate-500"

@@ -2,8 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSessionResultsById } from "@/lib/session-results";
 import { getSessionQuestionStats } from "@/lib/session-question-stats";
+import { getPracticeProgress } from "@/lib/practice-progress";
 import SessionResultsView from "@/components/session-results-view";
 import SessionQuestionChart from "@/components/session-question-chart";
+import PracticeProgressView from "@/components/practice-progress-view";
 import { TrophyIcon } from "@/components/dashboard-icons";
 import EndSessionButton from "./end-session-button";
 
@@ -17,6 +19,9 @@ export default async function AdminSessionDetailPage({
   if (!results) notFound();
 
   const questionStats = await getSessionQuestionStats(sessionId);
+  const practiceProgress = results.session.is_practice
+    ? await getPracticeProgress(sessionId)
+    : null;
 
   return (
     <div className="space-y-4">
@@ -50,6 +55,16 @@ export default async function AdminSessionDetailPage({
           >
             Watch live
           </Link>
+          {results.session.is_practice && (
+            <a
+              href={`/admin/sessions/${sessionId}/flyer`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link-btn rounded-md border-2 border-slate-700 px-3 py-1.5 text-sm text-slate-300 transition hover:border-[var(--cyan)]"
+            >
+              Print flyer
+            </a>
+          )}
           <EndSessionButton
             sessionId={sessionId}
             isOpen={results.session.is_open}
@@ -66,6 +81,15 @@ export default async function AdminSessionDetailPage({
           <SessionQuestionChart theme={results.session.theme} stats={questionStats} />
         </div>
       </div>
+
+      {practiceProgress && (
+        <div>
+          <h3 className="mb-2 text-lg font-bold" style={{ color: "var(--cyan)" }}>
+            Practice progress
+          </h3>
+          <PracticeProgressView students={practiceProgress} />
+        </div>
+      )}
     </div>
   );
 }
