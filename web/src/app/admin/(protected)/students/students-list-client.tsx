@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { Student } from "@/lib/types";
 
@@ -188,7 +189,12 @@ export default function StudentsListClient({
             />
             <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div>
-                <span className="text-slate-100">{s.name}</span>
+                <Link
+                  href={`/admin/students/${s.id}`}
+                  className="text-slate-100 hover:text-indigo-400"
+                >
+                  {s.name}
+                </Link>
                 <span className="ml-2 text-xs text-slate-500">
                   {counts[s.id] ?? 0} attempt(s) · joined{" "}
                   {new Date(s.created_at).toLocaleDateString()}
